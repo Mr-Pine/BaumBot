@@ -164,14 +164,11 @@ export async function execute(interaction: any, client: Client, topArgs: { optio
                     })
                 }
 
-                const embed = new MessageEmbed()
-                    .setColor(0x0341fc)
-                    .setDescription(`${vote.voteCount} Leute haben abgestimmt` + tempResText);
 
                 (client as any).api.interactions(interaction.id, interaction.token).callback.post({
                     data: {
-                        type: vote.anonymous ? 3 : 4,
-                        data: await createAPIMessage(interaction, embed, client)
+                        type: 4,
+                        data: await createAPIMessage(interaction, `Du hast für '${vote.options[voteCast - 1]}'abgestimmt. ${vote.voteCount} Leute haben abgestimmt` + tempResText, client, vote.anonymous ? 64 : 0)
                     }
                 });
             } else {
@@ -197,7 +194,6 @@ export async function execute(interaction: any, client: Client, topArgs: { optio
 
             let description = ""
             let max = Math.max(...Object.values(vote.result))
-            console.log(max)
             vote.options.forEach((option, index) => {
                 let count = vote.result[index + 1]
                 description = description + (count == max ? "**" : "") + `${option}: ${count ? count : 0}` + (count == max ? "**" : "") + `\n`
@@ -230,10 +226,12 @@ export async function execute(interaction: any, client: Client, topArgs: { optio
     }
 }
 
-async function createAPIMessage(interaction: any, content: any, client: Client) {
-    const apiMessage = await APIMessage.create(client.channels.resolve(interaction.channel_id) as TextChannel, content)
+async function createAPIMessage(interaction: any, content: any, client: Client, flags?: number) {
+    let apiMessage = await (APIMessage.create(client.channels.resolve(interaction.channel_id) as TextChannel, content)
         .resolveData()
-        .resolveFiles();
+        .resolveFiles());
+
+    (apiMessage.data as any).flags = flags
 
     return { ...apiMessage.data, files: apiMessage.files };
 }

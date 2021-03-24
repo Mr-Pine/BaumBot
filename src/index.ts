@@ -159,7 +159,8 @@ client.ws.on('INTERACTION_CREATE' as any, async interaction => {
             break;
         case "soundboard":
             const sound = args.find(arg => arg.name.toLowerCase() == "sound")?.value
-            const show_source = args.find(arg => arg.name.toLowerCase() == "anzeigen")
+            let show_source = args.find(arg => arg.name.toLowerCase() == "anzeigen")
+            show_source = show_source ? show_source.value : false
             try {
                 const voiceChannel = (await getVoice(interaction, client, interaction.member.user.id)).channel as Discord.VoiceChannel
                 voiceChannel.join().then(connection => {
@@ -176,7 +177,11 @@ client.ws.on('INTERACTION_CREATE' as any, async interaction => {
             }
             (client as any).api.interactions(interaction.id, interaction.token).callback.post({
                 data: {
-                    type: show_source ? 5 : 2,
+                    type: 4,
+                    data: {
+                        content: `Du hast einen Sound abgespielt!`,
+                        flags: show_source ? 0 : (1 << 6)
+                    },
                 }
             });
             break;
