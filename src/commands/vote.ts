@@ -1,4 +1,4 @@
-import { Client } from "discord.js"
+import { APIMessage, Client, MessageEmbed, TextChannel } from "discord.js"
 
 export let command = {
     data: {
@@ -57,15 +57,15 @@ var vote = {
     options: [] as string[],
     anonymous: true,
     tempRes: false,
-    result: {},
+    result: {} as {[s: string] : number},
     voteCount: 0,
-    voted: [],
+    voted: [] as string[],
     creator: "",
     active: false,
     name: ""
 }
 
-export function execute(interaction: any, client: Client, topArgs: { options: { name: string, value: any }[], name: string }[]) {
+export async function execute(interaction: any, client: Client, topArgs: { options: { name: string, value: any }[], name: string }[]) {
     let subCommand = topArgs[0].name
     let args = topArgs[0].options
 
@@ -110,7 +110,7 @@ export function execute(interaction: any, client: Client, topArgs: { options: { 
                         description: vote.name,
                         type: 4,
                         required: true,
-                        choices: [] as {name: string, value: string}[]
+                        choices: [] as { name: string, value: string }[]
                     }
                 ]
             }
@@ -131,17 +131,107 @@ export function execute(interaction: any, client: Client, topArgs: { options: { 
                 type: 1,
             })
 
-            (client as any).api.applications(client.user?.id).guilds(interaction.guild_id).commands.post(commandObject)
+                (client as any).api.applications(client.user?.id).guilds(interaction.guild_id).commands.post(commandObject)
+
+                (client as any).api.interactions(interaction.id, interaction.token).callback.post({
+                    data: {
+                        type: 4,
+                        data: {
+                            content: (module.exports.vote.anonymous ? "Umfrage gestartet!" : "Öffentliche Umfrage gestartet")
+                        }
+                    }
+                });
+
+            break;
+        case "cast":
+            console.log(interaction.member.nick)
+            if (!vote.voted.includes(interaction.member.user.id)) {
+                let voteCast = args.find(arg => arg.name == "vote")?.value
+                console.log(voteCast)
+                module.exports.vote.result[voteCast] = module.exports.vote.result[voteCast] ? module.exports.vote.result[voteCast] + 1 : 1
+                module.exports.vote.voteCount++;
+                module.exports.vote.voted.push(interaction.member.user.id)
+                console.log(module.exports.vote.voted)
+
+                var tempResText = ""
+                if (module.exports.vote.tempRes) {
+                    tempResText = ":\n\n"
+                    vote.options.forEach((option, index) => {
+                        var count = (vote.result as any)[(index + 1)]
+                        tempResText += `${option}: ${count ? count : 0}\n`
+                    })
+                }
+
+                let embed = new MessageEmbed()
+                    .setColor(0x0341fc)
+                    .setDescription(`${module.exports.vote.voteCount} Leute haben abgestimmt` + tempResText);
+
+                (client as any).api.interactions(interaction.id, interaction.token).callback.post({
+                    data: {
+                        type: module.exports.vote.anonymous ? 3 : 4,
+                        data: await createAPIMessage(interaction, embed, client)
+                    }
+                });
+            } else {
+                let embed = new MessageEmbed()
+                    .setColor(0x0341fc)
+                    .setDescription(`${interaction.member.nick} hat versucht, doppelt abzustimmen`);
+
+                (client as any).api.interactions(interaction.id, interaction.token).callback.post({
+                    data: {
+                        type: 4,
+                        data: await createAPIMessage(interaction, embed, client)
+                    }
+                });
+            }
+            break;
+        case "end":
+            if (!interaction.member.user.id == module.exports.vote.creator) return;
+
+            console.log(command);
+
+            (client as any).api.applications(client.user?.id).guilds(interaction.guild_id).commands.post(module.exports.command)
+
+
+            var description = ""
+            var max = Math.max(...Object.values(vote.result))
+            console.log(max)
+            vote.options.forEach((option, index) => {
+                var count = module.exports.vote.result[index + 1]
+                description = description + (count == max ? "**" : "") + `${option}: ${count ? count : 0}` + (count == max ? "**" : "") + `\n`
+            })
+
+            const embed = new MessageEmbed()
+                .setColor(0x0341fc)
+                .setTitle(`Abstimmung "${module.exports.vote.name}" beendet:`)
+                .setDescription(description);
 
             (client as any).api.interactions(interaction.id, interaction.token).callback.post({
                 data: {
                     type: 4,
-                    data: {
-                        content: (module.exports.vote.anonymous ? "Umfrage gestartet!" : "Öffentliche Umfrage gestartet")
-                    }
+                    data: await createAPIMessage(interaction, embed, client)
                 }
             });
+            module.exports.vote = {
+                options: [],
+                anonymous: true,
+                tempRes: false,
+                result: {},
+                voteCount: 0,
+                voted: [],
+                creator: "",
+                active: false,
+                name: ""
+            };
 
             break;
     }
+}
+
+async function createAPIMessage(interaction: any, content: any, client: Client) {
+    const apiMessage = await APIMessage.create(client.channels.resolve(interaction.channel_id) as TextChannel, content)
+        .resolveData()
+        .resolveFiles();
+
+    return { ...apiMessage.data, files: apiMessage.files };
 }
