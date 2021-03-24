@@ -110,7 +110,7 @@ export async function execute(interaction: any, client: Client, topArgs: { optio
                         description: vote.name,
                         type: 4,
                         required: true,
-                        choices: [] as { name: string, value: string }[]
+                        choices: [] as { name: string, value: number }[]
                     }
                 ]
             }
@@ -118,7 +118,7 @@ export async function execute(interaction: any, client: Client, topArgs: { optio
             vote.options.forEach((option, index) => {
                 subCommandObject.options[0].choices.push({
                     name: option,
-                    value: (index + 1).toString()
+                    value: (index + 1)
                 })
             })
 
@@ -150,13 +150,13 @@ export async function execute(interaction: any, client: Client, topArgs: { optio
             if (!vote.voted.includes(interaction.member.user.id)) {
                 let voteCast = args.find(arg => arg.name == "vote")?.value
                 console.log(voteCast)
-                module.exports.vote.result[voteCast] = module.exports.vote.result[voteCast] ? module.exports.vote.result[voteCast] + 1 : 1
-                module.exports.vote.voteCount++;
-                module.exports.vote.voted.push(interaction.member.user.id)
-                console.log(module.exports.vote.voted)
+                vote.result[voteCast] = vote.result[voteCast] ? vote.result[voteCast] + 1 : 1
+                vote.voteCount++;
+                vote.voted.push(interaction.member.user.id)
+                console.log(vote.voted)
 
                 var tempResText = ""
-                if (module.exports.vote.tempRes) {
+                if (vote.tempRes) {
                     tempResText = ":\n\n"
                     vote.options.forEach((option, index) => {
                         var count = (vote.result as any)[(index + 1)]
@@ -166,11 +166,11 @@ export async function execute(interaction: any, client: Client, topArgs: { optio
 
                 let embed = new MessageEmbed()
                     .setColor(0x0341fc)
-                    .setDescription(`${module.exports.vote.voteCount} Leute haben abgestimmt` + tempResText);
+                    .setDescription(`${vote.voteCount} Leute haben abgestimmt` + tempResText);
 
                 (client as any).api.interactions(interaction.id, interaction.token).callback.post({
                     data: {
-                        type: module.exports.vote.anonymous ? 3 : 4,
+                        type: vote.anonymous ? 3 : 4,
                         data: await createAPIMessage(interaction, embed, client)
                     }
                 });
@@ -188,24 +188,24 @@ export async function execute(interaction: any, client: Client, topArgs: { optio
             }
             break;
         case "end":
-            if (!interaction.member.user.id == module.exports.vote.creator) return;
+            if (interaction.member.user.id != vote.creator) return;
 
             console.log(command);
 
-            (client as any).api.applications(client.user?.id).guilds(interaction.guild_id).commands.post(module.exports.command)
+            (client as any).api.applications(client.user?.id).guilds(interaction.guild_id).commands.post(command)
 
 
             var description = ""
             var max = Math.max(...Object.values(vote.result))
             console.log(max)
             vote.options.forEach((option, index) => {
-                var count = module.exports.vote.result[index + 1]
+                var count = vote.result[index + 1]
                 description = description + (count == max ? "**" : "") + `${option}: ${count ? count : 0}` + (count == max ? "**" : "") + `\n`
             })
 
             const embed = new MessageEmbed()
                 .setColor(0x0341fc)
-                .setTitle(`Abstimmung "${module.exports.vote.name}" beendet:`)
+                .setTitle(`Abstimmung "${vote.name}" beendet:`)
                 .setDescription(description);
 
             (client as any).api.interactions(interaction.id, interaction.token).callback.post({
@@ -214,7 +214,7 @@ export async function execute(interaction: any, client: Client, topArgs: { optio
                     data: await createAPIMessage(interaction, embed, client)
                 }
             });
-            module.exports.vote = {
+            vote = {
                 options: [],
                 anonymous: true,
                 tempRes: false,
