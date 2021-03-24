@@ -1,6 +1,6 @@
 import { APIMessage, Client, MessageEmbed, TextChannel } from "discord.js"
 
-export let command = {
+export const command = {
     data: {
         name: "Vote",
         description: "Mache eine Umfrage",
@@ -53,7 +53,7 @@ export let command = {
     }
 }
 
-var vote = {
+let vote = {
     options: [] as string[],
     anonymous: true,
     tempRes: false,
@@ -66,8 +66,8 @@ var vote = {
 }
 
 export async function execute(interaction: any, client: Client, topArgs: { options: { name: string, value: any }[], name: string }[]) {
-    let subCommand = topArgs[0].name
-    let args = topArgs[0].options
+    const subCommand = topArgs[0].name
+    const args = topArgs[0].options
 
     switch (subCommand) {
         case "start":
@@ -89,18 +89,18 @@ export async function execute(interaction: any, client: Client, topArgs: { optio
             vote.name = args.find(arg => arg.name == "name")?.value
             console.log(args)
 
-            for (var i = 0; i < 4; i++) {
-                let option = args.find(arg => arg.name == `option_${i + 1}`)
+            for (let i = 0; i < 4; i++) {
+                const option = args.find(arg => arg.name == `option_${i + 1}`)
                 if (option) vote.options.push(option.value)
             }
 
-            let anonymous = args.find(arg => arg.name == `anonym`)
+            const anonymous = args.find(arg => arg.name == `anonym`)
             if (anonymous) vote.anonymous = anonymous.value
 
-            let tempRes = args.find(arg => arg.name == `zwischenergebnisse`)
+            const tempRes = args.find(arg => arg.name == `zwischenergebnisse`)
             if (tempRes) vote.tempRes = tempRes.value
 
-            var subCommandObject = {
+            let subCommandObject = {
                 name: "cast",
                 description: "Stimme ab",
                 type: 1,
@@ -122,10 +122,10 @@ export async function execute(interaction: any, client: Client, topArgs: { optio
                 })
             })
 
-            var commandObject = JSON.parse(JSON.stringify(command));
+            let commandObject = JSON.parse(JSON.stringify(command));
             commandObject.data.options.push(subCommandObject)
 
-            var endObject = {
+            let endObject = {
                 name: "end",
                 description: "Die Umfrage beenden",
                 type: 1,
@@ -148,23 +148,23 @@ export async function execute(interaction: any, client: Client, topArgs: { optio
         case "cast":
             console.log(interaction.member.nick)
             if (!vote.voted.includes(interaction.member.user.id)) {
-                let voteCast = args.find(arg => arg.name == "vote")?.value
+                const voteCast = args.find(arg => arg.name == "vote")?.value
                 console.log(voteCast)
                 vote.result[voteCast] = vote.result[voteCast] ? vote.result[voteCast] + 1 : 1
                 vote.voteCount++;
                 vote.voted.push(interaction.member.user.id)
                 console.log(vote.voted)
 
-                var tempResText = ""
+                let tempResText = ""
                 if (vote.tempRes) {
                     tempResText = ":\n\n"
                     vote.options.forEach((option, index) => {
-                        var count = (vote.result as any)[(index + 1)]
+                        let count = (vote.result as any)[(index + 1)]
                         tempResText += `${option}: ${count ? count : 0}\n`
                     })
                 }
 
-                let embed = new MessageEmbed()
+                const embed = new MessageEmbed()
                     .setColor(0x0341fc)
                     .setDescription(`${vote.voteCount} Leute haben abgestimmt` + tempResText);
 
@@ -175,7 +175,7 @@ export async function execute(interaction: any, client: Client, topArgs: { optio
                     }
                 });
             } else {
-                let embed = new MessageEmbed()
+                const embed = new MessageEmbed()
                     .setColor(0x0341fc)
                     .setDescription(`${interaction.member.nick} hat versucht, doppelt abzustimmen`);
 
@@ -195,11 +195,11 @@ export async function execute(interaction: any, client: Client, topArgs: { optio
             (client as any).api.applications(client.user?.id).guilds(interaction.guild_id).commands.post(command)
 
 
-            var description = ""
-            var max = Math.max(...Object.values(vote.result))
+            let description = ""
+            let max = Math.max(...Object.values(vote.result))
             console.log(max)
             vote.options.forEach((option, index) => {
-                var count = vote.result[index + 1]
+                let count = vote.result[index + 1]
                 description = description + (count == max ? "**" : "") + `${option}: ${count ? count : 0}` + (count == max ? "**" : "") + `\n`
             })
 

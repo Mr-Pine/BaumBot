@@ -3,10 +3,10 @@ import * as plshelp from "./commands/plshelp"
 import * as vote from "./commands/vote"
 import config from "./config.json"
 
-let client = new Discord.Client()
+const client = new Discord.Client()
 
 console.log('process.argv', process.argv);
-let resendCommands = process.argv.includes("--resend")
+const resendCommands = process.argv.includes("--resend")
 
 client.on('ready', () => {
     console.log('ready');
@@ -127,9 +127,9 @@ function sendCommands(client: Discord.Client) {
 }
 
 client.ws.on('INTERACTION_CREATE' as any, async interaction => {
-    let command = interaction.data.name.toLowerCase()
-    var topArgs = interaction.data.options
-    var args: { name: string, value: any }[] = [];
+    const command = interaction.data.name.toLowerCase()
+    let topArgs = interaction.data.options
+    let args: { name: string, value: any }[] = [];
     if (topArgs && topArgs.length > 0) {
         args = topArgs[0].options ? topArgs[0].options : topArgs
     }
@@ -137,8 +137,8 @@ client.ws.on('INTERACTION_CREATE' as any, async interaction => {
     switch (command) {
         case "ping":
 
-            var numberArg = args.find(arg => arg.name.toLowerCase() == "number")
-            var number = 0
+            let numberArg = args.find(arg => arg.name.toLowerCase() == "number")
+            let number = 0
             if (numberArg) {
                 number = numberArg.value
             }
@@ -154,14 +154,14 @@ client.ws.on('INTERACTION_CREATE' as any, async interaction => {
             });
             break;
         case "soundboard":
-            let sound = args.find(arg => arg.name.toLowerCase() == "sound")?.value
-            let show_source = args.find(arg => arg.name.toLowerCase() == "anzeigen")
+            const sound = args.find(arg => arg.name.toLowerCase() == "sound")?.value
+            const show_source = args.find(arg => arg.name.toLowerCase() == "anzeigen")
             try {
                 const voiceChannel = (await getVoice(interaction, client, interaction.member.user.id)).channel as Discord.VoiceChannel
                 voiceChannel.join().then(connection => {
                     const dispatcher = connection.play(sound)
-                    var started = false
-                    var counter = 0
+                    let started = false
+                    let counter = 0
                     dispatcher.on("finish", () => {
                         voiceChannel.leave()
                     })
