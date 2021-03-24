@@ -2,6 +2,7 @@ import * as Discord from "discord.js"
 import * as plshelp from "./commands/plshelp"
 import * as vote from "./commands/vote"
 import config from "./config.json"
+import { rocketTest } from "./rockets/rocketindex"
 
 const client = new Discord.Client()
 
@@ -12,6 +13,9 @@ client.on('ready', () => {
     console.log('ready');
 
     if (resendCommands) sendCommands(client);
+
+    let laal = rocketTest()
+    
 })
 
 function sendCommands(client: Discord.Client) {
