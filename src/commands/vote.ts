@@ -57,7 +57,7 @@ var vote = {
     options: [] as string[],
     anonymous: true,
     tempRes: false,
-    result: {} as {[s: string] : number},
+    result: {} as { [s: string]: number },
     voteCount: 0,
     voted: [] as string[],
     creator: "",
@@ -122,25 +122,27 @@ export async function execute(interaction: any, client: Client, topArgs: { optio
                 })
             })
 
-            var commandObject = JSON.parse(JSON.stringify(module.exports.command));
+            var commandObject = JSON.parse(JSON.stringify(command));
             commandObject.data.options.push(subCommandObject)
 
-            commandObject.data.options.push({
+            var endObject = {
                 name: "end",
                 description: "Die Umfrage beenden",
                 type: 1,
-            })
+            }
 
-                (client as any).api.applications(client.user?.id).guilds(interaction.guild_id).commands.post(commandObject)
+            commandObject.data.options.push(endObject);
 
-                (client as any).api.interactions(interaction.id, interaction.token).callback.post({
+            (client as any).api.applications(client.user?.id).guilds(interaction.guild_id).commands.post(commandObject);
+
+            (client as any).api.interactions(interaction.id, interaction.token).callback.post({
+                data: {
+                    type: 4,
                     data: {
-                        type: 4,
-                        data: {
-                            content: (module.exports.vote.anonymous ? "Umfrage gestartet!" : "Öffentliche Umfrage gestartet")
-                        }
+                        content: (vote.anonymous ? "Umfrage gestartet!" : "Öffentliche Umfrage gestartet")
                     }
-                });
+                }
+            });
 
             break;
         case "cast":
