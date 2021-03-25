@@ -14,7 +14,7 @@ client.on('ready', () => {
 
     if (resendCommands) sendCommands(client);
 
-    let laal = rocketTest()
+    let laal = rocketTest(client)
     
 })
 
