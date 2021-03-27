@@ -1,4 +1,5 @@
 import { APIMessage, Client, MessageEmbed, TextChannel } from "discord.js"
+import { createAPIMessage } from ".."
 
 export const command = {
     data: {
@@ -224,14 +225,4 @@ export async function execute(interaction: any, client: Client, topArgs: { optio
 
             break;
     }
-}
-
-async function createAPIMessage(interaction: any, content: any, client: Client, flags?: number) {
-    let apiMessage = await (APIMessage.create(client.channels.resolve(interaction.channel_id) as TextChannel, content)
-        .resolveData()
-        .resolveFiles());
-
-    (apiMessage.data as any).flags = flags
-
-    return { ...apiMessage.data, files: apiMessage.files };
 }

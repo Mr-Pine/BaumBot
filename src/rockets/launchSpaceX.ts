@@ -41,11 +41,12 @@ export class LaunchSpaceX extends LaunchExtended {
         //TODO: implement ProviderSpaceX and RocketSpaceX
         this.name = json.name
         this.id, this.sourceJSON, this.symbolImageUrl = "null"
-        this.mission = null //TODO: Mission SpaceX
+        this.mission = undefined //TODO: Mission SpaceX
         this.net = new Date(json.date_utc)
         this.launchpad = new LaunchpadSpaceX(json.launchpad as string)
         await this.launchpad.initialized
         this.status
+        this.webcast = {live: json.links.webcast != null, url: json.links.webcast}
 
         this.setSpaceXData(id)
 
@@ -55,7 +56,7 @@ export class LaunchSpaceX extends LaunchExtended {
         let json = await LaunchSpaceX.getSpaceXJSON("launches", id)
 
         this.patchUrl = json.links.patch.large
-        if (json.flickr.original.length != 0) this.symbolImageUrl = json.flickr.original[0]
+        if (json.links.flickr.original.length != 0) this.symbolImageUrl = json.links.flickr.original[0]
         this.webcast.url = json.webcast
         this.net = new Date(json.date_utc)
     }

@@ -8,7 +8,7 @@ export class Launch {
     symbolImageUrl: string
     infographicUrl: string
     provider: LaunchProvider
-    mission: Mission | null
+    mission: Mission | undefined
     net: Date
     launchpad: Launchpad
     rocket: Rocket
@@ -26,7 +26,7 @@ export class Launch {
             this.symbolImageUrl = sourceJSON.symbolImageUrl //todo Check if
             this.infographicUrl = sourceJSON.infographicUrl //todo really necessary here...
             this.provider = new LaunchProvider(sourceJSON.launch_service_provider)
-            this.mission = (sourceJSON.mission !== null) ? new Mission(sourceJSON.mission) : null
+            this.mission = (sourceJSON.mission !== null) ? new Mission(sourceJSON.mission) : undefined
             this.net = new Date(sourceJSON.net)
             this.launchpad = new Launchpad(sourceJSON.pad)
             this.rocket = new Rocket(sourceJSON.rocket)
@@ -36,14 +36,16 @@ export class Launch {
     }
 
     get embedField() {
+        let missionName = this.mission ? this.mission.name : this.name.substr(this.name.indexOf("|") + 1).trim()
         return {
-            name: `${this.tMinus()} | ${this.rocket.name} ${this.mission ? "| " + this.mission.name : ""}`,
-            value: `${this.mission?.description}\n\n**Quick Stats**:\n` +
-                `Mission Name: ${this.mission?.name}\n` +
-                `Launch Time: ${this.net.toLocaleString()}\n` +
+            name: `${this.tMinus()} | ${this.name}`,
+            value: `${this.mission ? this.mission.description : "no description available"}\n\n` +
+                `**Quick Stats**:\n` +
+                `Mission Name: ${missionName}\n` +
+                `Launch Time: ${this.net.toLocaleString('de-DE')}\n` +
                 `Launch at: ${this.launchpad.nameLocation}\n` +
                 `Launch Status: ${this.status.name}\n\n` +
-                `more info: \`/rockets launch id:${this.id}\`\n`
+                `more info: \`/rockets launches id:${this.id}\`\n`
         }
     }
 
@@ -87,16 +89,16 @@ export class Mission {
 }
 
 export class Orbit {
-    _name: string
-    _abbreviation: string
-    _id: number
+    protected _name: string
+    protected _abbreviation: string
+    protected _id: number
 
     private idTable = {
         "8": "Niedriger Erdorbit"
     } as { [id: string]: string }
 
     get name() {
-        return `${this._name} (${this._abbreviation}) - ${this.idTable[this._id.toString()]}`
+        return(`${this._name} (${this._abbreviation})` + (this.idTable[this._id.toString()] ? ` - ${this.idTable[this._id.toString()]}` : ""));
     }
 
     constructor(json: any) {
@@ -111,12 +113,12 @@ export class Launchpad {
     id: number | string
     protected _name: string
     protected _locationName: string
-    get nameLocation() {return `${this._name}, ${this._locationName}`}
+    get nameLocation() { return `${this._name}, ${this._locationName}` }
 
     constructor()
     constructor(json: any)
     constructor(json?: any) {
-        if(typeof json === "undefined"){
+        if (typeof json === "undefined") {
             return;
         }
 
@@ -142,9 +144,11 @@ export class Rocket {
 export class LaunchStatus {
     id: number
     name: string
+    abbreviation: string
 
     constructor(json: any) {
         this.id = json.id
         this.name = json.name
+        this.abbreviation = json.abbrev
     }
 }

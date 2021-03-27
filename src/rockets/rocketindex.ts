@@ -4,7 +4,7 @@ import { LaunchExtended } from "./launchExtended"
 import { LaunchSpaceX } from "./launchSpaceX"
 import { Launch } from "./rocketlaunch"
 
-const endpoints = {
+export const endpoints = {
     "LL2": {
         "Launches": "https://lldev.thespacedevs.com/2.0.0/launch/"
     }
@@ -25,9 +25,9 @@ export async function rocketTest(client: Client) {
 
     let upcomingEmbed = getUpcomingEmbed(launches)
 
-    client.channels.fetch("704275816598732840").then((botWiese) => {
+    /* client.channels.fetch("704275816598732840").then((botWiese) => {
         (botWiese as TextChannel).send(upcomingEmbed)
-    })
+    }) */
 
     let spaceXLaunch = new LaunchSpaceX("5eb87d42ffd86e000604b384")
     await spaceXLaunch.initialized;
@@ -35,20 +35,20 @@ export async function rocketTest(client: Client) {
     return true
 }
 
-async function getAPIData(endpointURL: string) {
+export async function getAPIData(endpointURL: string) {
     let headers = new Headers([["Accept", "application/json"]])
     let response = await fetch(endpointURL, { method: "GET", headers: headers })
     let json = await response.json()
     return json;
 }
 
-async function getExtended(launch: Launch) {
+export async function getExtended(launch: Launch) {
     let json = await getAPIData(launch.infoUrl)
 
     return new LaunchExtended(json)
 }
 
-function getUpcomingEmbed(launches: Launch[]) {
+export function getUpcomingEmbed(launches: Launch[]) {
     let embed = new MessageEmbed()
         .setTitle("Upcoming Rocketlaunches")
         .setDescription("the 5 next rocket lauches")
