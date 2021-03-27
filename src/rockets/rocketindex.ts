@@ -1,11 +1,12 @@
 import { Client, MessageEmbed, TextChannel } from "discord.js"
 import fetch, { Headers } from "node-fetch"
 import { LaunchExtended } from "./launchExtended"
+import { LaunchSpaceX } from "./launchSpaceX"
 import { Launch } from "./rocketlaunch"
 
 const endpoints = {
     "LL2": {
-        "Launches": "https://ll.thespacedevs.com/2.0.0/launch/"
+        "Launches": "https://lldev.thespacedevs.com/2.0.0/launch/"
     }
 }
 
@@ -28,6 +29,9 @@ export async function rocketTest(client: Client) {
         (botWiese as TextChannel).send(upcomingEmbed)
     })
 
+    let spaceXLaunch = new LaunchSpaceX("5eb87d42ffd86e000604b384")
+    await spaceXLaunch.initialized;
+
     return true
 }
 
@@ -39,9 +43,7 @@ async function getAPIData(endpointURL: string) {
 }
 
 async function getExtended(launch: Launch) {
-    let headers = new Headers([["Accept", "application/json"]])
-    let response = await fetch(launch.infoUrl, { method: "GET", headers: headers })
-    let json = await response.json()
+    let json = await getAPIData(launch.infoUrl)
 
     return new LaunchExtended(json)
 }

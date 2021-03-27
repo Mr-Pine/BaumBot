@@ -140,7 +140,6 @@ client.ws.on('INTERACTION_CREATE' as any, async interaction => {
 
     switch (command) {
         case "ping":
-
             let numberArg = args.find(arg => arg.name.toLowerCase() == "number")
             let number = 0
             if (numberArg) {
@@ -190,6 +189,7 @@ client.ws.on('INTERACTION_CREATE' as any, async interaction => {
             break;
         case "plshelp":
             plshelp.execute(interaction, client, args)
+            break;
     }
 })
 

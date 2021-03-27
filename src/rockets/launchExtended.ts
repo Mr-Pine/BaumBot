@@ -2,13 +2,17 @@ import { Launch, LaunchProvider, Rocket} from "./rocketlaunch";
 
 export class LaunchExtended extends Launch{
     launchWindow: {start: Date, end: Date}
-    provider: LaunchProviderExtended
+    provider: LaunchProviderExtended | LaunchProvider
     rocket: RocketExtended
     webcast: {live: boolean, url: string}
 
-    constructor(sourceJSON: any){
+    constructor()
+    constructor(sourceJSON: any)
+    constructor(sourceJSON?: any) {
         super(sourceJSON)
 
+        if(typeof sourceJSON === "undefined") return;
+        
         this.launchWindow = {
             start: new Date(sourceJSON.window_start),
             end: new Date(sourceJSON.window_end)
@@ -25,7 +29,7 @@ export class LaunchExtended extends Launch{
     }
 }
 
-class LaunchProviderExtended extends LaunchProvider{
+export class LaunchProviderExtended extends LaunchProvider{
     type: string
     countryCode: string
     description: string
@@ -39,6 +43,7 @@ class LaunchProviderExtended extends LaunchProvider{
             successful: number
         }
     }
+    logoUrl: string
     wikipedia: string
 
     constructor(json: any){
@@ -59,10 +64,11 @@ class LaunchProviderExtended extends LaunchProvider{
         }
 
         this.wikipedia = json.wiki_url
+        this.logoUrl = json.logo_url
     }
 }
 
-class RocketExtended extends Rocket{
+export class RocketExtended extends Rocket{
     infoUrl: string
     description: string
     dimensions: {launchLength: number, diameter: number, mass: number}

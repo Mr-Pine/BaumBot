@@ -15,36 +15,41 @@ export class Launch {
     status: LaunchStatus
     infoUrl: string
 
-    constructor(sourceJSON: any) {
-        this.sourceJSON = sourceJSON
-        this.name = sourceJSON.name
-        this.id = sourceJSON.id
-        this.symbolImageUrl = sourceJSON.symbolImageUrl //todo Check if
-        this.infographicUrl = sourceJSON.infographicUrl //todo really necessary here...
-        this.provider = new LaunchProvider(sourceJSON.launch_service_provider)
-        this.mission = (sourceJSON.mission !== null) ? new Mission(sourceJSON.mission) : null
-        this.net = new Date(sourceJSON.net)
-        this.launchpad = new Launchpad(sourceJSON.pad)
-        this.rocket = new Rocket(sourceJSON.rocket)
-        this.status = new LaunchStatus(sourceJSON.status)
-        this.infoUrl = sourceJSON.url
+    constructor()
+    constructor(sourceJSON: any)
+    constructor(sourceJSON?: any) {
+
+        if (typeof sourceJSON !== "undefined") {
+            this.sourceJSON = sourceJSON
+            this.name = sourceJSON.name
+            this.id = sourceJSON.id
+            this.symbolImageUrl = sourceJSON.symbolImageUrl //todo Check if
+            this.infographicUrl = sourceJSON.infographicUrl //todo really necessary here...
+            this.provider = new LaunchProvider(sourceJSON.launch_service_provider)
+            this.mission = (sourceJSON.mission !== null) ? new Mission(sourceJSON.mission) : null
+            this.net = new Date(sourceJSON.net)
+            this.launchpad = new Launchpad(sourceJSON.pad)
+            this.rocket = new Rocket(sourceJSON.rocket)
+            this.status = new LaunchStatus(sourceJSON.status)
+            this.infoUrl = sourceJSON.url
+        }
     }
 
     get embedField() {
         return {
-            name: `${this.tMinus()} | ${this.rocket.name} ${this.mission ? "| "+ this.mission.name : ""}`,
-            value: `${this.mission?.description}\n\n**Quick Stats**:\n` + 
-            `Mission Name: ${this.mission?.name}\n` + 
-            `Launch Time: ${this.net.toLocaleString()}\n` + 
-            `Launch at: ${this.launchpad.name}, ${this.launchpad.locationName}\n` + 
-            `Launch Status: ${this.status.name}\n\n` + 
-            `more info: \`/rockets launch id:${this.id}\`\n`
+            name: `${this.tMinus()} | ${this.rocket.name} ${this.mission ? "| " + this.mission.name : ""}`,
+            value: `${this.mission?.description}\n\n**Quick Stats**:\n` +
+                `Mission Name: ${this.mission?.name}\n` +
+                `Launch Time: ${this.net.toLocaleString()}\n` +
+                `Launch at: ${this.launchpad.nameLocation}\n` +
+                `Launch Status: ${this.status.name}\n\n` +
+                `more info: \`/rockets launch id:${this.id}\`\n`
         }
     }
 
     tMinus() {
         let now = new Date();
-        let diff = (this.net.getTime() - now.getTime())/1000;
+        let diff = (this.net.getTime() - now.getTime()) / 1000;
         let diffAbs = Math.abs(diff)
 
         let days = Math.floor(diffAbs / (60 * 60 * 24))
@@ -101,17 +106,24 @@ export class Orbit {
     }
 }
 
-class Launchpad {
+export class Launchpad {
     agencyID: number //TODO: Get whole Agency
-    id: number
-    name: string
-    locationName: string
+    id: number | string
+    private _name: string
+    private _locationName: string
+    get nameLocation() {return `${this._name}, ${this._locationName}`}
 
-    constructor(json: any) {
+    constructor()
+    constructor(json: any)
+    constructor(json?: any) {
+        if(typeof json === "undefined"){
+            return;
+        }
+
         this.agencyID = json.agency_id
         this.id = json.id
-        this.name = json.name
-        this.locationName = json.location.name
+        this._name = json.name
+        this._locationName = json.location.name
     }
 }
 
@@ -127,7 +139,7 @@ export class Rocket {
     }
 }
 
-class LaunchStatus {
+export class LaunchStatus {
     id: number
     name: string
 
