@@ -86,14 +86,14 @@ class LaunchpadSpaceX extends Launchpad {
 
                 let json = await LaunchSpaceX.getSpaceXJSON("launchpads", jsonID)
                 this.id = json.id
-                this.name = json.full_name
-                this.locationName = `${json.locality}, ${json.region}`
+                this._name = json.full_name
+                this._locationName = `${json.locality}, ${json.region}`
                 resolve(undefined)
             })
         } else {
             this.id = jsonID.id
-            this.name = jsonID.full_name
-            this.locationName = `${jsonID.locality}, ${jsonID.region}`
+            this._name = jsonID.full_name
+            this._locationName = `${jsonID.locality}, ${jsonID.region}`
             this.initialized = new Promise(resolve => { resolve(undefined) })
         }
     }

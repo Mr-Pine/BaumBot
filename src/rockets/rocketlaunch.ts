@@ -109,8 +109,8 @@ export class Orbit {
 export class Launchpad {
     agencyID: number //TODO: Get whole Agency
     id: number | string
-    private _name: string
-    private _locationName: string
+    protected _name: string
+    protected _locationName: string
     get nameLocation() {return `${this._name}, ${this._locationName}`}
 
     constructor()
