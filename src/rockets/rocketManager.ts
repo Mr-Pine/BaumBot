@@ -2,7 +2,6 @@ import * as Discord from "discord.js"
 import { createAPIMessage } from "..";
 import { Launch } from "./rocketlaunch";
 import { getAPIData, getUpcomingEmbed, getExtended, endpoints } from "./rocketindex"
-import { LaunchExtended } from "./launchExtended";
 
 export const command = {
     data: {
