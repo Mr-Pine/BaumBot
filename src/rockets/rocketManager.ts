@@ -2,6 +2,7 @@ import * as Discord from "discord.js"
 import { createAPIMessage } from "..";
 import { Launch } from "./rocketlaunch";
 import { getAPIData, getUpcomingEmbed, getExtended, endpoints } from "./rocketindex"
+import { LaunchExtended } from "./launchExtended";
 
 export const command = {
     data: {
@@ -25,7 +26,7 @@ export const command = {
     }
 }
 
-let launchesUpcoming: {[id: string]: Launch};
+let allLaunches: {upcoming: string[], launches: {[id: string]: Launch}} =  {upcoming: [], launches: {}};
 
 export async function execute(interaction: any, client: Discord.Client, topArgs: { options: { name: string, value: any }[], name: string }[]) {
     const subCommand = topArgs[0].name
@@ -37,26 +38,28 @@ export async function execute(interaction: any, client: Discord.Client, topArgs:
         let idArg = args ? args.find(arg => arg.name == `id`) : undefined
 
         if(typeof idArg === "undefined"){
-            if (typeof launchesUpcoming === "undefined") {
+            if (allLaunches.upcoming.length < 1) {
                 const launchLibraryJSON = await getAPIData(`${endpoints.LL2.Launches}upcoming/?limit=6`)
-                launchesUpcoming = {} as {[id: string]: Launch}
+                allLaunches.upcoming = [] as string[];
 
                 launchLibraryJSON.results.forEach((launchJson: any) => {
                     let launch = new Launch(launchJson)
-                    launchesUpcoming[launch.id] = launch
+                    allLaunches.launches[launch.id] = launch
+                    allLaunches.upcoming.push(launch.id)
                 });
             }
 
             (client as any).api.interactions(interaction.id, interaction.token).callback.post({
                 data: {
                     type: 4,
-                    data: await createAPIMessage(interaction, getUpcomingEmbed(Object.values(launchesUpcoming)), client),
+                    data: await createAPIMessage(interaction, getUpcomingEmbed(Object.values(allLaunches.launches).filter(launch => allLaunches.upcoming.includes(launch.id))), client),
                 }
             });
         } else {
             const id: string = idArg.value
 
-            let launch = await getExtended(launchesUpcoming[id]);  //FIXME only working if previously got by getting previous launches
+            let launch = Object.keys(allLaunches.launches).includes(id) ? await getExtended(allLaunches.launches[id]) : await getExtended(id);
+            allLaunches.launches[id] = launch;
 
             (client as any).api.interactions(interaction.id, interaction.token).callback.post({
                 data: {

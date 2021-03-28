@@ -42,8 +42,16 @@ export async function getAPIData(endpointURL: string) {
     return json;
 }
 
-export async function getExtended(launch: Launch) {
-    let json = await getAPIData(launch.infoUrl)
+export async function getExtended(id: string): Promise<LaunchExtended>;
+export async function getExtended(launch: Launch | LaunchExtended): Promise<LaunchExtended>;
+export async function getExtended(launchOrID: Launch | LaunchExtended | string) {
+    
+    if(launchOrID instanceof LaunchExtended){
+        return launchOrID
+    }
+
+    const extendedUrl = (typeof launchOrID !== "string") ? launchOrID.infoUrl : endpoints.LL2.Launches + launchOrID
+    let json = await getAPIData(extendedUrl)
 
     return new LaunchExtended(json)
 }
@@ -51,7 +59,7 @@ export async function getExtended(launch: Launch) {
 export function getUpcomingEmbed(launches: Launch[]) {
     let embed = new MessageEmbed()
         .setTitle("Upcoming Rocketlaunches")
-        .setDescription("the 5 next rocket lauches")
+        .setDescription("the 6 next rocket lauches")
         .setURL("https://everydayastronaut.com/prelaunch-previews/")
         .setColor(0xfca103)
         .setTimestamp(new Date());
