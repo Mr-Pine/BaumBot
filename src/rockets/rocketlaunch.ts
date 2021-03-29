@@ -23,8 +23,8 @@ export class Launch {
             this.sourceJSON = sourceJSON
             this.name = sourceJSON.name
             this.id = sourceJSON.id
-            this.symbolImageUrl = sourceJSON.symbolImageUrl //todo Check if
-            this.infographicUrl = sourceJSON.infographicUrl //todo really necessary here...
+            this.symbolImageUrl = sourceJSON.image              //TODO: Check if
+            this.infographicUrl = sourceJSON.infographicUrl     //TODO: really necessary here...
             this.provider = new LaunchProvider(sourceJSON.launch_service_provider)
             this.mission = (sourceJSON.mission !== null) ? new Mission(sourceJSON.mission) : undefined
             this.net = new Date(sourceJSON.net)
@@ -98,7 +98,7 @@ export class Orbit {
     } as { [id: string]: string }
 
     get name() {
-        return(`${this._name} (${this._abbreviation})` + (this.idTable[this._id.toString()] ? ` - ${this.idTable[this._id.toString()]}` : ""));
+        return (`${this._name} (${this._abbreviation})` + (this.idTable[this._id.toString()] ? ` - ${this.idTable[this._id.toString()]}` : ""));
     }
 
     constructor(json: any) {
@@ -109,7 +109,7 @@ export class Orbit {
 }
 
 export class Launchpad {
-    agencyID: number //TODO: Get whole Agency
+    agencyID: number //MAYBE: Get whole Agency
     id: number | string
     protected _name: string
     protected _locationName: string
@@ -134,10 +134,15 @@ export class Rocket {
     name: string
     variantId: number
 
-    constructor(json: any) {
-        this.id = json.id
-        this.name = json.configuration.full_name
-        this.variantId = json.configuration.id
+
+    constructor()
+    constructor(json: any)
+    constructor(json?: any) {
+        if (json) {
+            this.id = json.id
+            this.name = json.configuration.full_name
+            this.variantId = json.configuration.id
+        }
     }
 }
 

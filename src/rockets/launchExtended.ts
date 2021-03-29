@@ -22,7 +22,7 @@ export class LaunchExtended extends Launch {
         this.provider = new LaunchProviderExtended(sourceJSON.launch_service_provider)
         this.rocket = new RocketExtended(sourceJSON.rocket)
 
-        this.webcast = { live: sourceJSON.webcast_live, url: sourceJSON.vidURLs[0] }
+        this.webcast = { live: sourceJSON.webcast_live, url: sourceJSON.vidURLs[0]?.url }
     }
 
     getExtended = async () => {
@@ -49,8 +49,8 @@ export class LaunchExtended extends Launch {
             `Country: ${this.provider.countryCode}`
         );
         embed.addField(
-            `Rocket`,
-            `Name: ${this.rocket.name}`
+            `Rocket: ${this.rocket.name}`,
+            this.rocket.info
         );
         embed.addField(
             `Launch status: ${this.status.abbreviation}`,
@@ -61,7 +61,7 @@ export class LaunchExtended extends Launch {
             this.webcast.live ? `[Webcast now live!](${this.webcast.url})` : `No livestream available (yet)`
         )
 
-        if (this.infographicUrl) embed.setImage(this.infographicUrl)
+        if (this.infographicUrl) embed.setThumbnail(this.infographicUrl)
         if (this.symbolImageUrl) embed.setImage(this.symbolImageUrl)
 
 
@@ -113,11 +113,28 @@ export class RocketExtended extends Rocket {
     description: string
     dimensions: { launchLength: number, diameter: number, mass: number }
     firstFlight: Date
-    capacityLeo: number
+    capacity: {leo: number}
+    get capacityInfo(){
+        return `capacity to LEO: ${this.capacity.leo / 1000}t`
+    }
     launches: { count: number, successful: number }
+
+    get info(){
+        let infoString = this.description +
+        `\n\nSuccessful launches: ${this.launches.successful} / ${this.launches.count} attempted launches\n` +
+        `Dimensions: \n-- height ${this.dimensions.launchLength}m\n-- diameter: ${this.dimensions.diameter}m\n-- mass: ${this.dimensions.mass}t\n-- ${this.capacityInfo}`
+        return infoString
+    }
     //TODO missing properties
 
-    constructor(json: any) {
+    constructor()
+    constructor(json: any)
+    constructor(json?: any) {
+        if(typeof json === "undefined"){
+            super()
+            return;
+        }
+
         super(json)
 
         this.infoUrl = json.configuration.url
@@ -128,7 +145,7 @@ export class RocketExtended extends Rocket {
             mass: json.configuration.launch_mass
         }
         this.firstFlight = new Date(json.configuration.maiden_flight)
-        this.capacityLeo = json.configuration.leo_capacity
+        this.capacity = {leo: json.configuration.leo_capacity}
         this.launches = {
             count: json.configuration.total_launch_count,
             successful: json.configuration.successful_launches

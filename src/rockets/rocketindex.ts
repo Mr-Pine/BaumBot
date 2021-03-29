@@ -3,34 +3,25 @@ import fetch, { Headers } from "node-fetch"
 import { LaunchExtended } from "./launchExtended"
 import { LaunchSpaceX } from "./launchSpaceX"
 import { Launch } from "./rocketlaunch"
+import { allLaunches } from './rocketManager'
+
+import * as starlink from "./starlink22.json"//DEBUG
 
 export const endpoints = {
     "LL2": {
-        "Launches": "https://lldev.thespacedevs.com/2.0.0/launch/"
+        "Launches": "https://ll.thespacedevs.com/2.2.0/launch/"
     }
 }
 
 export async function rocketTest(client: Client) {
     console.log("hello rocket")
 
-    const launchLibraryJSON = await getAPIData(`${endpoints.LL2.Launches}upcoming/?limit=6`)
+    let spaceXJSON = starlink
 
-    let launches: Launch[] = []
-
-    launchLibraryJSON.results.forEach((launchJson: any) => {
-        launches.push(new Launch(launchJson))
-    });
-
-    let extended = await getExtended(launches[0])
-
-    let upcomingEmbed = getUpcomingEmbed(launches)
-
-    /* client.channels.fetch("704275816598732840").then((botWiese) => {
-        (botWiese as TextChannel).send(upcomingEmbed)
-    }) */
-
-    let spaceXLaunch = new LaunchSpaceX("5eb87d42ffd86e000604b384")
+    let spaceXLaunch = new LaunchSpaceX(starlink)
     await spaceXLaunch.initialized;
+
+    allLaunches.launches[spaceXLaunch.id] = spaceXLaunch
 
     return true
 }
@@ -45,15 +36,28 @@ export async function getAPIData(endpointURL: string) {
 export async function getExtended(id: string): Promise<LaunchExtended>;
 export async function getExtended(launch: Launch | LaunchExtended): Promise<LaunchExtended>;
 export async function getExtended(launchOrID: Launch | LaunchExtended | string) {
-    
-    if(launchOrID instanceof LaunchExtended){
+
+    if (launchOrID instanceof LaunchExtended) {
+        if (launchOrID.sourceJSON.r_spacex_api_id != null) {
+            let spaceXLaunch = launchOrID as LaunchSpaceX
+            await spaceXLaunch.setSpaceXData(launchOrID.sourceJSON.r_spacex_api_id)
+            return spaceXLaunch
+        }
         return launchOrID
     }
 
     const extendedUrl = (typeof launchOrID !== "string") ? launchOrID.infoUrl : endpoints.LL2.Launches + launchOrID
     let json = await getAPIData(extendedUrl)
 
-    return new LaunchExtended(json)
+    if (json.r_spacex_api_id != null) {
+        let spaceXLaunch = new LaunchSpaceX(json)
+        await spaceXLaunch.initialized
+        return spaceXLaunch
+    }
+
+    let extendedLaunch = new LaunchExtended(json)
+
+    return extendedLaunch;
 }
 
 export function getUpcomingEmbed(launches: Launch[]) {
