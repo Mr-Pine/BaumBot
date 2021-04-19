@@ -1,4 +1,5 @@
 import { LaunchExtended } from "./launchExtended"
+import { getAPIData } from "./rocketindex"
 
 export class Launch {
 
@@ -14,25 +15,32 @@ export class Launch {
     rocket: Rocket
     status: LaunchStatus
     infoUrl: string
+    lastUpdated: number;
 
     constructor()
     constructor(sourceJSON: any)
     constructor(sourceJSON?: any) {
 
         if (typeof sourceJSON !== "undefined") {
-            this.sourceJSON = sourceJSON
-            this.name = sourceJSON.name
-            this.id = sourceJSON.id
-            this.symbolImageUrl = sourceJSON.image              //TODO: Check if
-            this.infographicUrl = sourceJSON.infographicUrl     //TODO: really necessary here...
-            this.provider = new LaunchProvider(sourceJSON.launch_service_provider)
-            this.mission = (sourceJSON.mission !== null) ? new Mission(sourceJSON.mission) : undefined
-            this.net = new Date(sourceJSON.net)
-            this.launchpad = new Launchpad(sourceJSON.pad)
-            this.rocket = new Rocket(sourceJSON.rocket)
-            this.status = new LaunchStatus(sourceJSON.status)
-            this.infoUrl = sourceJSON.url
+            this.updateData(sourceJSON)
         }
+    }
+
+    updateData(sourceJSON: any) {
+        this.sourceJSON = sourceJSON
+        this.name = sourceJSON.name
+        this.id = sourceJSON.id
+        this.symbolImageUrl = sourceJSON.image              //TODO: Check if
+        this.infographicUrl = sourceJSON.infographicUrl     //TODO: really necessary here...
+        this.provider = new LaunchProvider(sourceJSON.launch_service_provider)
+        this.mission = (sourceJSON.mission !== null) ? new Mission(sourceJSON.mission) : undefined
+        this.net = new Date(sourceJSON.net)
+        this.launchpad = new Launchpad(sourceJSON.pad)
+        this.rocket = new Rocket(sourceJSON.rocket)
+        this.status = new LaunchStatus(sourceJSON.status)
+        this.infoUrl = sourceJSON.url
+        this.lastUpdated = (new Date()).getTime() - this.net.getTime();
+        this.lastUpdatedT = 0;
     }
 
     get embedField() {
@@ -59,6 +67,66 @@ export class Launch {
         let minutes = Math.floor((diffAbs % (60 * 60)) / 60);
 
         return `T${Math.sign(-diff) < 1 ? '-' : '+'} ${days}d ${hours}h ${minutes}m`
+    }
+
+    static updateTable = [
+        24 * 60 * 60 * 1000, //every day
+        12 * 60 * 60 * 1000, //12h
+        6 * 60 * 60 * 1000, //6h
+        3 * 60 * 60 * 1000, //3h
+        2 * 60 * 60 * 1000, //2h
+        1 * 60 * 60 * 1000, //1h
+        30 * 60 * 1000, //30m
+        20 * 60 * 1000, //20m
+        10 * 60 * 1000, //10m
+        5 * 60 * 1000, //5m
+        1 * 60 * 1000, //1m
+    ]
+
+    lastUpdatedT: number;
+
+    async getOwnAPIData() {
+        let headers = new Headers([["Accept", "application/json"]])
+        let response = await fetch(this.infoUrl, { method: "GET", headers: headers })
+        let json = await response.json()
+        return json;
+    }
+
+    async update(force = false) {
+        if (force) {
+            let json = await this.getOwnAPIData()
+            this.updateData(json)
+            return;
+        }
+
+        let tminusTime = Math.abs((new Date()).getTime() - this.net.getTime());
+
+        for (let i = Launch.updateTable.length - 1; i >= 0; i--) {
+            let value = Launch.updateTable[i]
+            if (tminusTime < value && this.lastUpdatedT < i) {
+                this.lastUpdatedT = i
+
+                let json = await this.getOwnAPIData()
+                this.updateData(json)
+                this.lastUpdated = (new Date()).getTime() - this.net.getTime()
+                this.lastUpdatedT = i
+                return;
+            }
+
+            if (i = 0) {
+                let difference = Math.abs(this.lastUpdated - (new Date()).getTime() - this.net.getTime())
+                let multiple = difference / Launch.updateTable[0]
+                if (multiple >= 1) {
+                    this.lastUpdatedT = i
+
+                    let json = await this.getOwnAPIData()
+                    this.updateData(json)
+                    this.lastUpdated = (new Date()).getTime() - this.net.getTime()
+                    this.lastUpdatedT = i
+                    return;
+                }
+            }
+        }
     }
 }
 

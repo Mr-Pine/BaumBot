@@ -37,7 +37,7 @@ export class LaunchSpaceX extends LaunchExtended {
     }
 
     private async setSpaceXDataCommon(id: string) {
-        let json = await LaunchSpaceX.getSpaceXJSON("launches", id)
+        let json = await LaunchSpaceX.getSpaceXJSON("launches", id) //TODO use query route!; https://github.com/r-spacex/SpaceX-API/blob/master/docs/v4/queries.md 
 
         this.net = new Date(json.date_utc)
         this.launchWindow = { start: this.net, end: this.net }
@@ -212,3 +212,5 @@ class CoreSpaceX {
         })
     }
 }
+
+//TODO SpaceX Payload

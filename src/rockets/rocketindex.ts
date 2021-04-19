@@ -43,6 +43,7 @@ export async function getExtended(launchOrID: Launch | LaunchExtended | string) 
             await spaceXLaunch.setSpaceXData(launchOrID.sourceJSON.r_spacex_api_id)
             return spaceXLaunch
         }
+        //await launchOrID.update() //DEBUG
         return launchOrID
     }
 
@@ -51,16 +52,20 @@ export async function getExtended(launchOrID: Launch | LaunchExtended | string) 
 
     if (json.r_spacex_api_id != null) {
         let spaceXLaunch = new LaunchSpaceX(json)
+
+        //await spaceXLaunch.update() //DEBUG
+
         await spaceXLaunch.initialized
         return spaceXLaunch
     }
 
     let extendedLaunch = new LaunchExtended(json)
+    //await extendedLaunch.update() //DEBUG
 
     return extendedLaunch;
 }
 
-export function getUpcomingEmbed(launches: Launch[]) {
+export async function getUpcomingEmbed(launches: Launch[]) {
     let embed = new MessageEmbed()
         .setTitle("Upcoming Rocketlaunches")
         .setDescription("the 6 next rocket lauches")
@@ -68,7 +73,7 @@ export function getUpcomingEmbed(launches: Launch[]) {
         .setColor(0xfca103)
         .setTimestamp(new Date());
 
-    launches.forEach(launch => {
+    launches.forEach(async launch => {
         let fieldData = launch.embedField
         embed.addField(fieldData.name, fieldData.value, false)
     })

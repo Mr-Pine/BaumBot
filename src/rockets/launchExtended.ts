@@ -11,8 +11,10 @@ export class LaunchExtended extends Launch {
     constructor(sourceJSON: any)
     constructor(sourceJSON?: any) {
         super(sourceJSON)
+    }
 
-        if (typeof sourceJSON === "undefined") return;
+    updateData(sourceJSON: any) {
+        super.updateData(sourceJSON)
 
         this.launchWindow = {
             start: new Date(sourceJSON.window_start),
@@ -113,16 +115,16 @@ export class RocketExtended extends Rocket {
     description: string
     dimensions: { launchLength: number, diameter: number, mass: number }
     firstFlight: Date
-    capacity: {leo: number}
-    get capacityInfo(){
+    capacity: { leo: number }
+    get capacityInfo() {
         return `capacity to LEO: ${this.capacity.leo / 1000}t`
     }
     launches: { count: number, successful: number }
 
-    get info(){
+    get info() {
         let infoString = this.description +
-        `\n\nSuccessful launches: ${this.launches.successful} / ${this.launches.count} attempted launches\n` +
-        `Dimensions: \n-- height ${this.dimensions.launchLength}m\n-- diameter: ${this.dimensions.diameter}m\n-- mass: ${this.dimensions.mass}t\n-- ${this.capacityInfo}`
+            `\n\nSuccessful launches: ${this.launches.successful} / ${this.launches.count} attempted launches\n` +
+            `Dimensions: \n-- height ${this.dimensions.launchLength}m\n-- diameter: ${this.dimensions.diameter}m\n-- mass: ${this.dimensions.mass}t\n-- ${this.capacityInfo}`
         return infoString
     }
     //TODO missing properties
@@ -130,7 +132,7 @@ export class RocketExtended extends Rocket {
     constructor()
     constructor(json: any)
     constructor(json?: any) {
-        if(typeof json === "undefined"){
+        if (typeof json === "undefined") {
             super()
             return;
         }
@@ -145,7 +147,7 @@ export class RocketExtended extends Rocket {
             mass: json.configuration.launch_mass
         }
         this.firstFlight = new Date(json.configuration.maiden_flight)
-        this.capacity = {leo: json.configuration.leo_capacity}
+        this.capacity = { leo: json.configuration.leo_capacity }
         this.launches = {
             count: json.configuration.total_launch_count,
             successful: json.configuration.successful_launches

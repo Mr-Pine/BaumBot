@@ -37,27 +37,33 @@ export async function execute(interaction: any, client: Discord.Client, topArgs:
             let idArg = args ? args.find(arg => arg.name == `id`) : undefined
 
             if (typeof idArg === "undefined") {
-                if (allLaunches.upcoming.length < 1) {
-                    const launchLibraryJSON = await getAPIData(`${endpoints.LL2.Launches}upcoming/?limit=6`)
-                    allLaunches.upcoming = [] as string[];
+                const launchLibraryJSON = await getAPIData(`${endpoints.LL2.Launches}upcoming/?limit=6`)
+                allLaunches.upcoming = [] as string[];
 
-                    launchLibraryJSON.results.forEach((launchJson: any) => {
-                        let launch = new Launch(launchJson)
+                for (let i = 0; i < launchLibraryJSON.results.length; i++) {
+                    let launchJson = launchLibraryJSON.results[i]
+                    let launch = new Launch(launchJson)
+                    if (typeof allLaunches.launches[launch.id] == "undefined") {
                         allLaunches.launches[launch.id] = launch
-                        allLaunches.upcoming.push(launch.id)
-                    });
-                }
+                    } else {
+                        await allLaunches.launches[launch.id].update() //DEBUG
+                    }
+                    allLaunches.upcoming.push(launch.id)
+                };
+
+
 
                 (client as any).api.interactions(interaction.id, interaction.token).callback.post({
                     data: {
                         type: 4,
-                        data: await createAPIMessage(interaction, getUpcomingEmbed(Object.values(allLaunches.launches).filter(launch => allLaunches.upcoming.includes(launch.id))), client),
+                        data: await createAPIMessage(interaction, await getUpcomingEmbed(Object.values(allLaunches.launches).filter(launch => allLaunches.upcoming.includes(launch.id))), client),
                     }
                 });
             } else {
                 const id: string = idArg.value;
 
                 let launch = Object.keys(allLaunches.launches).includes(id) ? await getExtended(allLaunches.launches[id]) : await getExtended(id);
+                await launch.update() //DEBUG
                 allLaunches.launches[id] = launch;
 
                 await (client as any).api.interactions(interaction.id, interaction.token).callback.post({
