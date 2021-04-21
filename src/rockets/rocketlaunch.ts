@@ -1,3 +1,4 @@
+import fetch, { Headers } from "node-fetch"
 import { LaunchExtended } from "./launchExtended"
 import { getAPIData } from "./rocketindex"
 
@@ -96,6 +97,7 @@ export class Launch {
         if (force) {
             let json = await this.getOwnAPIData()
             this.updateData(json)
+            console.log("doing update")
             return;
         }
 
@@ -110,6 +112,7 @@ export class Launch {
                 this.updateData(json)
                 this.lastUpdated = (new Date()).getTime() - this.net.getTime()
                 this.lastUpdatedT = i
+                console.log("doing update")
                 return;
             }
 
@@ -123,6 +126,7 @@ export class Launch {
                     this.updateData(json)
                     this.lastUpdated = (new Date()).getTime() - this.net.getTime()
                     this.lastUpdatedT = i
+                    console.log("doing update")
                     return;
                 }
             }

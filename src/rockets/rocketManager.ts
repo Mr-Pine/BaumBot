@@ -18,6 +18,12 @@ export const command = {
                         description: "ID of a specific Launch",
                         type: 3,
                         required: false
+                    },
+                    {
+                        name: "force",
+                        description: "Force an update of the data",
+                        type: 5,
+                        required: false
                     }
                 ]
             }
@@ -35,35 +41,54 @@ export async function execute(interaction: any, client: Discord.Client, topArgs:
         case "launches":
 
             let idArg = args ? args.find(arg => arg.name == `id`) : undefined
+            let forceArg = args ? args.find(arg => arg.name == `force`) : undefined
+            let force = typeof forceArg == "undefined" ? false : forceArg.value;
 
             if (typeof idArg === "undefined") {
+
+               
+
                 const launchLibraryJSON = await getAPIData(`${endpoints.LL2.Launches}upcoming/?limit=6`)
                 allLaunches.upcoming = [] as string[];
+
+                (client as any).api.interactions(interaction.id, interaction.token).callback.post({
+                    data: {
+                        type: 5
+                    }
+                });
+
+                if((launchLibraryJSON.detail as string)?.startsWith("Request was throttled")) {
+                    await (client as any).api.webhooks(client.user?.id, interaction.token).messages('@original').patch({
+                        data: await createAPIMessage(interaction, "Please wait until available again...", client), //TODO accept old data
+                    });
+                    return;
+                }
 
                 for (let i = 0; i < launchLibraryJSON.results.length; i++) {
                     let launchJson = launchLibraryJSON.results[i]
                     let launch = new Launch(launchJson)
                     if (typeof allLaunches.launches[launch.id] == "undefined") {
                         allLaunches.launches[launch.id] = launch
+                        console.log("getting new data")
                     } else {
-                        await allLaunches.launches[launch.id].update() //DEBUG
+                        await allLaunches.launches[launch.id].update(force)
+                        console.log("updating")
                     }
                     allLaunches.upcoming.push(launch.id)
+                    console.log(`upcoming Launches: ${allLaunches.upcoming}`)
                 };
 
 
 
-                (client as any).api.interactions(interaction.id, interaction.token).callback.post({
-                    data: {
-                        type: 4,
-                        data: await createAPIMessage(interaction, await getUpcomingEmbed(Object.values(allLaunches.launches).filter(launch => allLaunches.upcoming.includes(launch.id))), client),
-                    }
+
+                await (client as any).api.webhooks(client.user?.id, interaction.token).messages('@original').patch({
+                    data: await createAPIMessage(interaction, await getUpcomingEmbed(Object.values(allLaunches.launches).filter(launch => allLaunches.upcoming.includes(launch.id))), client),
                 });
             } else {
                 const id: string = idArg.value;
 
                 let launch = Object.keys(allLaunches.launches).includes(id) ? await getExtended(allLaunches.launches[id]) : await getExtended(id);
-                await launch.update() //DEBUG
+                await launch.update(force)
                 allLaunches.launches[id] = launch;
 
                 await (client as any).api.interactions(interaction.id, interaction.token).callback.post({
