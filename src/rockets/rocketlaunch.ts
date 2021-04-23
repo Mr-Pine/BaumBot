@@ -93,44 +93,47 @@ export class Launch {
         return json;
     }
 
-    async update(force = false) {
-        if (force) {
-            let json = await this.getOwnAPIData()
-            this.updateData(json)
-            console.log("doing update")
-            return;
+    async update(force = false, launchJSON: any | undefined) {
+        if (force && typeof launchJSON != "undefined") {
+            return await this.doUpdate(this.lastUpdatedT, launchJSON);
         }
 
         let tminusTime = Math.abs((new Date()).getTime() - this.net.getTime());
 
-        for (let i = Launch.updateTable.length - 1; i >= 0; i--) {
+        for (var i = Launch.updateTable.length - 1; i >= 0; i--) {
             let value = Launch.updateTable[i]
             if (tminusTime < value && this.lastUpdatedT < i) {
-                this.lastUpdatedT = i
-
-                let json = await this.getOwnAPIData()
-                this.updateData(json)
-                this.lastUpdated = (new Date()).getTime() - this.net.getTime()
-                this.lastUpdatedT = i
-                console.log("doing update")
-                return;
+                console.log(`Update @ ${i}`)
+                return await this.doUpdate(i)
             }
 
-            if (i = 0) {
+            if (i == 0) {
                 let difference = Math.abs(this.lastUpdated - (new Date()).getTime() - this.net.getTime())
                 let multiple = difference / Launch.updateTable[0]
                 if (multiple >= 1) {
-                    this.lastUpdatedT = i
-
-                    let json = await this.getOwnAPIData()
-                    this.updateData(json)
-                    this.lastUpdated = (new Date()).getTime() - this.net.getTime()
-                    this.lastUpdatedT = i
-                    console.log("doing update")
-                    return;
+                    console.log("over one day")
+                    return await this.doUpdate(i)
                 }
             }
         }
+
+        return true
+    }
+
+    async doUpdate(i: number, launchJSON?: any) {
+        this.lastUpdatedT = i
+
+        let json = (typeof launchJSON == "undefined") ? await this.getOwnAPIData() : launchJSON
+
+        if((json.detail as string)?.startsWith("Request was throttled")) {
+            return false
+        }
+
+        this.updateData(json)
+        this.lastUpdated = (new Date()).getTime() - this.net.getTime()
+        this.lastUpdatedT = i
+        console.log("doing update")
+        return true;
     }
 }
 

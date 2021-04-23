@@ -66,15 +66,19 @@ export async function execute(interaction: any, client: Discord.Client, topArgs:
 
                 for (let i = 0; i < launchLibraryJSON.results.length; i++) {
                     let launchJson = launchLibraryJSON.results[i]
-                    let launch = new Launch(launchJson)
-                    if (typeof allLaunches.launches[launch.id] == "undefined") {
+                    if (typeof allLaunches.launches[launchJson.id] == "undefined") {
+                        let launch = new Launch(launchJson)
+                        launch.net = new Date("2021-04-23T23:00:00Z")
                         allLaunches.launches[launch.id] = launch
                         console.log("getting new data")
                     } else {
-                        await allLaunches.launches[launch.id].update(force)
+                        let result = await allLaunches.launches[launchJson.id].update(force, launchJson) //update with combined data from upcoming launches if forced
+
+                        if(result === false) await (client as any).api.webhooks(client.user?.id, interaction.token).messages('@original').patch({data: await createAPIMessage(interaction, "please wait until available again", client)});
+
                         console.log("updating")
                     }
-                    allLaunches.upcoming.push(launch.id)
+                    allLaunches.upcoming.push(launchJson.id)
                     console.log(`upcoming Launches: ${allLaunches.upcoming}`)
                 };
 
@@ -88,7 +92,7 @@ export async function execute(interaction: any, client: Discord.Client, topArgs:
                 const id: string = idArg.value;
 
                 let launch = Object.keys(allLaunches.launches).includes(id) ? await getExtended(allLaunches.launches[id]) : await getExtended(id);
-                await launch.update(force)
+                await launch.update(force, undefined)
                 allLaunches.launches[id] = launch;
 
                 await (client as any).api.interactions(interaction.id, interaction.token).callback.post({

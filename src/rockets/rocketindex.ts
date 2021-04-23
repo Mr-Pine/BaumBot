@@ -9,7 +9,7 @@ import * as starlink from "./starlink22.json"//DEBUG
 
 export const endpoints = {
     "LL2": {
-        "Launches": "https://ll.thespacedevs.com/2.2.0/launch/"
+        "Launches": "https://lldev.thespacedevs.com/2.2.0/launch/"
     }
 }
 

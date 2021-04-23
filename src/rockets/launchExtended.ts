@@ -69,6 +69,22 @@ export class LaunchExtended extends Launch {
 
         return embed
     }
+
+    async doUpdate(i: number, launchJSON?: any) {
+        this.lastUpdatedT = i
+
+        let json = typeof launchJSON == "undefined" ? await this.getOwnAPIData() : launchJSON
+
+        if((json.detail as string)?.startsWith("Request was throttled")) {
+            return false
+        }
+
+        typeof launchJSON != "undefined" ? this.updateData(json) : super.updateData(json)
+        this.lastUpdated = (new Date()).getTime() - this.net.getTime()
+        this.lastUpdatedT = i
+        console.log("doing update")
+        return true;
+    }
 }
 
 export class LaunchProviderExtended extends LaunchProvider {
