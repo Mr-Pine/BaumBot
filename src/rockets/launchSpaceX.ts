@@ -15,7 +15,7 @@ export class LaunchSpaceX extends LaunchExtended {
     constructor(spaceXID: string)
     constructor(sourceJSON: any)
     constructor(SpXIDorJSON: any) {
-        if (typeof SpXIDorJSON !== "string") {
+        /* if (typeof SpXIDorJSON !== "string") {
             super(SpXIDorJSON)
         } else {
             super()
@@ -30,10 +30,27 @@ export class LaunchSpaceX extends LaunchExtended {
 
 
             resolve(undefined)
-        })
+        }) */
+        super()
+        if (typeof SpXIDorJSON !== "string") {
+            this.initialized = new Promise(async resolve => {
+                await this.updateData(SpXIDorJSON)
 
+                resolve(undefined)
+            })
+        }
+    }
 
+    async updateData(SpXIDorJSON: any) {
+        if (typeof SpXIDorJSON !== "string") {
+            await super.updateData(SpXIDorJSON)
+        }
 
+        if (typeof SpXIDorJSON === "string") {
+            await this.setSpaceXDataCommon(SpXIDorJSON)
+        } else {
+            await this.setSpaceXData(SpXIDorJSON.r_spacex_api_id)
+        }
     }
 
     private async setSpaceXDataCommon(id: string) {
@@ -42,6 +59,7 @@ export class LaunchSpaceX extends LaunchExtended {
         this.net = new Date(json.date_utc)
         this.launchWindow = { start: this.net, end: this.net }
         this.rocket = new RocketSpaceX(json)
+        await this.rocket.initialized
         //TODO: implement ProviderSpaceX
         this.name = json.name
         this.id, this.sourceJSON, this.symbolImageUrl = "null"
@@ -91,8 +109,8 @@ export class LaunchSpaceX extends LaunchExtended {
         let core = this.rocket.core
         embed.addField(
             `Core: ${core.identifier}`,
-            `Flight: ${core.flightNumber} / ${core.launchCount}\n` + 
-            `Landing: ${!core.landingAttempt ? "not " : ""} attempted and ${!core.landingAttempt ? "not " : ""} auccessful\n` +
+            `Flight: ${core.flightNumber} / ${core.launchCount}\n` +
+            `Landing: ${!core.landingAttempt ? "not " : ""} attempted and ${!core.landingAttempt ? "not " : ""} successful\n` +
             `Landing type: ${core.landingType}` //TODO: and landing on ${core.landingPad.name}
         )
         let fields = embed.fields;
@@ -101,6 +119,22 @@ export class LaunchSpaceX extends LaunchExtended {
         fields[fields.length - 1] = statusField;
         embed.fields = fields;
         return embed
+    }
+
+    async doUpdate(i: number, launchJSON?: any) {
+        this.lastUpdatedT = i
+
+        let json = typeof launchJSON == "undefined" ? await this.getOwnAPIData() : launchJSON
+
+        if((json.detail as string)?.startsWith("Request was throttled")) {
+            return false
+        }
+
+        typeof launchJSON == "undefined" ? await this.updateData(json) : super.updateData(json)
+        this.lastUpdated = (new Date()).getTime() - this.net.getTime()
+        this.lastUpdatedT = i
+        console.log("doing update")
+        return true;
     }
 }
 
@@ -186,7 +220,7 @@ class CoreSpaceX {
     landings: { asds: { attempted: number, success: number }, rtls: { attempted: number, success: number } }
     launchCount: number
 
-    get identifier(){
+    get identifier() {
         return `${this._serialNumber}-${this.flightNumber}`
     }
 

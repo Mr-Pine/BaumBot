@@ -6,11 +6,13 @@ export class LaunchExtended extends Launch {
     provider: LaunchProviderExtended
     rocket: RocketExtended
     webcast: { live: boolean, url: string }
+    extended = true
 
     constructor()
     constructor(sourceJSON: any)
     constructor(sourceJSON?: any) {
-        super(sourceJSON)
+        super()
+        if(typeof sourceJSON != "undefined") this.updateData(sourceJSON)
     }
 
     updateData(sourceJSON: any) {
@@ -79,7 +81,7 @@ export class LaunchExtended extends Launch {
             return false
         }
 
-        typeof launchJSON != "undefined" ? this.updateData(json) : super.updateData(json)
+        typeof launchJSON == "undefined" ? this.updateData(json) : super.updateData(json)
         this.lastUpdated = (new Date()).getTime() - this.net.getTime()
         this.lastUpdatedT = i
         console.log("doing update")

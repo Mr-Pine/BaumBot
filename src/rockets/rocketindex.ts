@@ -9,7 +9,7 @@ import * as starlink from "./starlink22.json"//DEBUG
 
 export const endpoints = {
     "LL2": {
-        "Launches": "https://lldev.thespacedevs.com/2.2.0/launch/"
+        "Launches": "https://ll.thespacedevs.com/2.2.0/launch/"
     }
 }
 
@@ -38,7 +38,7 @@ export async function getExtended(launch: Launch | LaunchExtended): Promise<Laun
 export async function getExtended(launchOrID: Launch | LaunchExtended | string) {
 
     if (launchOrID instanceof LaunchExtended) {
-        if (launchOrID.sourceJSON.r_spacex_api_id != null) {
+        if (launchOrID.sourceJSON.r_spacex_api_id != null && !(launchOrID instanceof LaunchSpaceX)) {
             let spaceXLaunch = launchOrID as LaunchSpaceX
             await spaceXLaunch.setSpaceXData(launchOrID.sourceJSON.r_spacex_api_id)
             return spaceXLaunch

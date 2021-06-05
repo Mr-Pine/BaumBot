@@ -17,11 +17,11 @@ export class Launch {
     status: LaunchStatus
     infoUrl: string
     lastUpdated: number;
+    extended = false;
 
     constructor()
     constructor(sourceJSON: any)
     constructor(sourceJSON?: any) {
-
         if (typeof sourceJSON !== "undefined") {
             this.updateData(sourceJSON)
         }
@@ -108,11 +108,11 @@ export class Launch {
             }
 
             if (i == 0) {
-                let difference = Math.abs(this.lastUpdated - (new Date()).getTime() - this.net.getTime())
+                let difference = Math.abs(this.lastUpdated - ((new Date()).getTime() - this.net.getTime()))
                 let multiple = difference / Launch.updateTable[0]
                 if (multiple >= 1) {
                     console.log("over one day")
-                    return await this.doUpdate(i)
+                    return !this.extended ? await this.doUpdate(i, launchJSON) : await this.doUpdate(i)
                 }
             }
         }

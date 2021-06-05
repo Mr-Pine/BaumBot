@@ -68,7 +68,6 @@ export async function execute(interaction: any, client: Discord.Client, topArgs:
                     let launchJson = launchLibraryJSON.results[i]
                     if (typeof allLaunches.launches[launchJson.id] == "undefined") {
                         let launch = new Launch(launchJson)
-                        launch.net = new Date("2021-04-23T23:00:00Z")
                         allLaunches.launches[launch.id] = launch
                         console.log("getting new data")
                     } else {
