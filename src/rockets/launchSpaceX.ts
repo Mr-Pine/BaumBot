@@ -17,6 +17,7 @@ export class LaunchSpaceX extends LaunchExtended {
     constructor(SpXIDorJSON: any) {
         /* if (typeof SpXIDorJSON !== "string") {
             super(SpXIDorJSON)
+            
         } else {
             super()
         }
