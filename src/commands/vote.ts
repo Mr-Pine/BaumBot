@@ -3,7 +3,7 @@ import { createAPIMessage } from ".."
 
 export const command = {
     data: {
-        name: "Vote",
+        name: "vote",
         description: "Mache eine Umfrage",
         options: [
             {
@@ -12,38 +12,38 @@ export const command = {
                 type: 1,
                 options: [
                     {
-                        name: "Name",
+                        name: "name",
                         description: "Der Name der Umfrage",
                         type: 3,
                         required: true
                     },
                     {
-                        name: "Option_1",
+                        name: "option_1",
                         description: "Gib die erste Option für deine Umfrage ein",
                         type: 3,
                         required: true
                     }, {
-                        name: "Option_2",
+                        name: "option_2",
                         description: "Gib die zweite Option für deine Umfrage ein",
                         type: 3,
                         required: true
                     }, {
-                        name: "Option_3",
+                        name: "option_3",
                         description: "Gib die dritte Option für deine Umfrage ein",
                         type: 3,
                     }, {
-                        name: "Option_4",
+                        name: "option_4",
                         description: "Gib die vierte Option für deine Umfrage ein",
                         type: 3,
                     },
                     {
-                        name: "Anonym",
+                        name: "anonym",
                         description: "Diese Umfrage anonym starten?",
                         type: 5,
                         required: false,
                     },
                     {
-                        name: "Zwischenergebnisse",
+                        name: "zwischenergebnisse",
                         description: "Neue Zwischenergebnisse anzeigen wenn jemand abgestimmt hat?",
                         type: 5,
                         required: false
