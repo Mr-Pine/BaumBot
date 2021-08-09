@@ -108,34 +108,37 @@ export async function execute(interaction: any, client: Discord.Client, args: { 
     const soundSource = args.find(arg => arg.name.toLowerCase() == "sound")?.value
     let showSourceArg = args.find(arg => arg.name.toLowerCase() == "anzeigen")
     let showSource = showSourceArg ? showSourceArg.value as boolean : false
-    
+
     playSound(interaction, client, soundSource, showSource);
 }
 
-export async function handleButtons(interaction: any, client: Discord.Client, customID: string){
+export async function handleButtons(interaction: any, client: Discord.Client, customID: string) {
     playSound(interaction, client, customID, false)
 }
 
-async function playSound(interaction: any, client: Discord.Client, soundSource: string, show_source: boolean){
-    try {
-        const voiceChannel = (await getVoice(interaction, client, interaction.member.user.id)).channel as Discord.VoiceChannel
-        let connection = Voice.joinVoiceChannel({
-            channelId: voiceChannel.id,
-            guildId: interaction.guild_id,
-            adapterCreator: await (await client.guilds.fetch(interaction.guild_id)).voiceAdapterCreator
-        })
-        connection.on(Voice.VoiceConnectionStatus.Ready, () => {
-            let player = Voice.createAudioPlayer();
-            player.play(Voice.createAudioResource(soundSource))
-            connection.subscribe(player)
-            player.on(Voice.AudioPlayerStatus.Idle, () => {
-                player.stop()
-                connection.destroy()
+async function playSound(interaction: any, client: Discord.Client, soundSource: string, show_source: boolean) {
+    let voice = await getVoice(interaction, client, interaction.member.user.id)
+    if (voice) {
+        try {
+            const voiceChannel = voice.channel as Discord.VoiceChannel
+            let connection = Voice.joinVoiceChannel({
+                channelId: voiceChannel.id,
+                guildId: interaction.guild_id,
+                adapterCreator: await (await client.guilds.fetch(interaction.guild_id)).voiceAdapterCreator
             })
-        })
-    } catch (err) {
-        console.log(err)
-        console.log(interaction.member)
+            let player = Voice.createAudioPlayer();
+            connection.subscribe(player)
+            connection.on(Voice.VoiceConnectionStatus.Ready, () => {
+                player.play(Voice.createAudioResource(soundSource))
+                player.on(Voice.AudioPlayerStatus.Idle, () => {
+                    player.stop()
+                    connection.destroy()
+                })
+            })
+        } catch (err) {
+            console.log(err)
+            console.log(interaction.member)
+        }
     }
     (client as any).api.interactions(interaction.id, interaction.token).callback.post({
         data: {
@@ -150,7 +153,7 @@ async function playSound(interaction: any, client: Discord.Client, soundSource: 
 
 async function getVoice(interaction: any, client: Discord.Client, member: string) {
     const guild = await client.guilds.fetch(interaction.guild_id)
-    const voice = await guild.voiceStates.cache.get(member) || new Discord.VoiceState(guild, { user_id: member });
+    const voice = await guild.voiceStates.cache.get(member)
     return voice
 }
 

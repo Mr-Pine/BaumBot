@@ -1,4 +1,5 @@
 import * as Discord from "discord.js"
+import * as Voice from "@discordjs/voice"
 import * as plshelp from "./commands/plshelp"
 import * as vote from "./commands/vote"
 import * as soundboard from "./commands/soundboard"
@@ -6,10 +7,12 @@ import * as rocketManager from "./rockets/rocketManager"
 import config from "./config.json"
 import { rocketTest } from "./rockets/rocketindex"
 
-const client = new Discord.Client({intents: [Discord.Intents.FLAGS.GUILDS, Discord.Intents.FLAGS.GUILD_MEMBERS, Discord.Intents.FLAGS.GUILD_BANS, Discord.Intents.FLAGS.GUILD_EMOJIS_AND_STICKERS, 
-    Discord.Intents.FLAGS.GUILD_INTEGRATIONS, Discord.Intents.FLAGS.GUILD_WEBHOOKS, Discord.Intents.FLAGS.GUILD_INVITES, Discord.Intents.FLAGS.GUILD_VOICE_STATES, Discord.Intents.FLAGS.GUILD_PRESENCES, 
-    Discord.Intents.FLAGS.GUILD_MESSAGES, Discord.Intents.FLAGS.GUILD_MESSAGE_REACTIONS, Discord.Intents.FLAGS.GUILD_MESSAGE_TYPING, Discord.Intents.FLAGS.DIRECT_MESSAGES, 
-    Discord.Intents.FLAGS.DIRECT_MESSAGE_REACTIONS, Discord.Intents.FLAGS.DIRECT_MESSAGE_TYPING]})
+const client = new Discord.Client({
+    intents: [Discord.Intents.FLAGS.GUILDS, Discord.Intents.FLAGS.GUILD_MEMBERS, Discord.Intents.FLAGS.GUILD_BANS, Discord.Intents.FLAGS.GUILD_EMOJIS_AND_STICKERS,
+    Discord.Intents.FLAGS.GUILD_INTEGRATIONS, Discord.Intents.FLAGS.GUILD_WEBHOOKS, Discord.Intents.FLAGS.GUILD_INVITES, Discord.Intents.FLAGS.GUILD_VOICE_STATES, Discord.Intents.FLAGS.GUILD_PRESENCES,
+    Discord.Intents.FLAGS.GUILD_MESSAGES, Discord.Intents.FLAGS.GUILD_MESSAGE_REACTIONS, Discord.Intents.FLAGS.GUILD_MESSAGE_TYPING, Discord.Intents.FLAGS.DIRECT_MESSAGES,
+    Discord.Intents.FLAGS.DIRECT_MESSAGE_REACTIONS, Discord.Intents.FLAGS.DIRECT_MESSAGE_TYPING]
+})
 
 console.log('process.argv', process.argv);
 const resendCommands = process.argv.includes("--resend")
@@ -91,7 +94,7 @@ client.ws.on('INTERACTION_CREATE' as any, async interaction => {
         console.log("button");
         let customID = interaction.data.custom_id as string;
         let croppedID = customID.substr(customID.lastIndexOf('\\') + 1);
-        if(customID.startsWith("soundboard\\")){
+        if (customID.startsWith("soundboard\\")) {
             soundboard.handleButtons(interaction, client, croppedID)
         }
     }
@@ -100,7 +103,7 @@ client.ws.on('INTERACTION_CREATE' as any, async interaction => {
 client.login(config.token)
 
 export async function createAPIMessage(interaction: any, content: any, client: Discord.Client, flags?: number, componentObject?: any) {
-    let apiMessage = await (Discord.APIMessage.create(client.channels.resolve(interaction.channel_id) as Discord.TextChannel, content)
+    let apiMessage = await (Discord.MessagePayload.create(client.channels.resolve(interaction.channel_id) as Discord.TextChannel, content)
         .resolveData()
         .resolveFiles());
 
@@ -111,8 +114,7 @@ export async function createAPIMessage(interaction: any, content: any, client: D
 }
 
 process.on("SIGINT", _ => {
-    client.user?.setStatus("invisible").then(() => {
-        console.log("SIGINT exiting")
-        process.exit(0)
-    })
+    client.user?.setStatus("invisible")
+    console.log("SIGINT exiting")
+    process.exit(0)
 })

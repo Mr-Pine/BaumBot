@@ -21,6 +21,7 @@
     "discord.js": "^13.0.1",
     "ffmpeg-static": "^4.2.8",
     "intl": "^1.2.5",
+    "libsodium-wrappers": "^0.7.9",
     "node-fetch": "^2.6.1"
   }
 }

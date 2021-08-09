@@ -1,4 +1,4 @@
-import { APIMessage, Client, MessageEmbed, TextChannel } from "discord.js"
+import { Client, MessageEmbed } from "discord.js"
 import { createAPIMessage } from ".."
 
 export const command = {
