@@ -109,7 +109,7 @@ export async function createAPIMessage(interaction: Discord.CommandInteraction, 
     if (componentObject) {
         (apiMessage.data as any).components = componentObject;
     }
-    apiMessage.options.
+    (apiMessage.data as any).flags = ephemeral ? 64 : 0;
 
     return apiMessage;
 }

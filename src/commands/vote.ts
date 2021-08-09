@@ -158,7 +158,7 @@ export async function execute(interaction: CommandInteraction, client: Client) {
                     })
                 }
 
-                interaction.reply(await createAPIMessage(interaction, `Du hast für '${vote.options[voteCast - 1]}'abgestimmt. ${vote.voteCount} Leute haben abgestimmt` + tempResText, client, vote.anonymous ? 64 : 0))
+                interaction.reply(await createAPIMessage(interaction, `Du hast für '${vote.options[voteCast - 1]}'abgestimmt. ${vote.voteCount} Leute haben abgestimmt` + tempResText, client, undefined, vote.anonymous))
             } else {
                 const embed = new MessageEmbed()
                     .setColor(0x0341fc)
@@ -192,12 +192,7 @@ export async function execute(interaction: CommandInteraction, client: Client) {
                 .setTitle(`Abstimmung "${vote.name}" beendet:`)
                 .setDescription(description);
 
-            (client as any).api.interactions(interaction.id, interaction.token).callback.post({
-                data: {
-                    type: 4,
-                    data: await createAPIMessage(interaction, embed, client)
-                }
-            });
+            interaction.reply({embeds: [embed]})
             vote = {
                 options: [],
                 anonymous: true,
