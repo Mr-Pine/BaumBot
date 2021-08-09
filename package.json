@@ -17,8 +17,9 @@
   },
   "dependencies": {
     "@discordjs/opus": "^0.5.0",
-    "discord.js": "^12.5.3",
-    "ffmpeg-static": "^4.3.0",
+    "@discordjs/voice": "^0.5.6",
+    "discord.js": "^13.0.1",
+    "ffmpeg-static": "^4.2.8",
     "intl": "^1.2.5",
     "node-fetch": "^2.6.1"
   }

@@ -1,4 +1,5 @@
 import * as Discord from "discord.js";
+import * as Voice from "@discordjs/voice"
 import { createAPIMessage } from "..";
 
 export const command = {
@@ -118,14 +119,20 @@ export async function handleButtons(interaction: any, client: Discord.Client, cu
 async function playSound(interaction: any, client: Discord.Client, soundSource: string, show_source: boolean){
     try {
         const voiceChannel = (await getVoice(interaction, client, interaction.member.user.id)).channel as Discord.VoiceChannel
-        voiceChannel.join().then(connection => {
-            const dispatcher = connection.play(soundSource)
-            let started = false
-            let counter = 0
-            dispatcher.on("finish", () => {
-                voiceChannel.leave()
+        let connection = Voice.joinVoiceChannel({
+            channelId: voiceChannel.id,
+            guildId: interaction.guild_id,
+            adapterCreator: await (await client.guilds.fetch(interaction.guild_id)).voiceAdapterCreator
+        })
+        connection.on(Voice.VoiceConnectionStatus.Ready, () => {
+            let player = Voice.createAudioPlayer();
+            player.play(Voice.createAudioResource(soundSource))
+            connection.subscribe(player)
+            player.on(Voice.AudioPlayerStatus.Idle, () => {
+                player.stop()
+                connection.destroy()
             })
-        }).catch(err => console.log(err))
+        })
     } catch (err) {
         console.log(err)
         console.log(interaction.member)
