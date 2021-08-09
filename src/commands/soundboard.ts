@@ -112,7 +112,7 @@ export async function execute(interaction: any, client: Discord.Client, args: { 
 }
 
 export async function handleButtons(interaction: any, client: Discord.Client, customID: string){
-    playSound(interaction, client, customID, true)
+    playSound(interaction, client, customID, false)
 }
 
 async function playSound(interaction: any, client: Discord.Client, soundSource: string, show_source: boolean){
