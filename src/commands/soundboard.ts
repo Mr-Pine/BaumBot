@@ -3,111 +3,108 @@ import * as Voice from "@discordjs/voice"
 import { createAPIMessage } from "..";
 
 export const command = {
-    data: {
-        name: "soundboard",
-        description: "Play a sound from a collection of sounds",
-        options: [
-            {
-                name: "schaller",
-                description: "O-Töne von Herr Schaller? Waaaaaaaas? Abgefaaaaaah'n",
-                type: 1,
-                options: [
-                    {
-                        name: "sound",
-                        description: "The sound played",
-                        type: 3,
-                        required: true,
-                        choices: [
-                            {
-                                value: "./Sounds/feierabend_leck_moodle.mp3",
-                                name: "Moodle, BBB, Boah leck, endlich Feierabend"
-                            },
-                            {
-                                value: "./Sounds/waermi_auf_de_ranze.mp3",
-                                name: "Wärmi auf de Ranze! Ah herrlich!"
-                            },
-                            {
-                                value: "./Sounds/mach_ich_mit_bin_dabei.mp3",
-                                name: "Da mach ich mit! Da bin ich dabei!"
-                            },
-                            {
-                                value: "./Sounds/waas_abgefahren.mp3",
-                                name: "Waaaaaaas?! Abgefaaaaah'n!"
-                            },
-                        ]
-                    },
-                    {
-                        name: "anzeigen",
-                        description: "Zeigt an, dass du diesen Command verwendet hast",
-                        type: 5,
-                        required: false,
-                        default: false
-                    }
-                ]
-            },
-            {
-                name: "verschiedenes",
-                description: "Verschiedene Sounds",
-                type: 1,
-                options: [
-                    {
-                        name: "sound",
-                        description: "The sound played",
-                        type: 3,
-                        required: true,
-                        choices: [
-                            {
-                                value: "./Sounds/hello_how_are_you_im_under_the_water.mp3",
-                                name: "Please help me, I'm under the water"
-                            },
-                            {
-                                value: "./Sounds/pro gamer move.mp3",
-                                name: "I'm gonna do what's called a pro gamer move"
-                            },
-                            {
-                                value: "./Sounds/Big Brain Time.mp3",
-                                name: "Yeah, this is big brain time"
-                            },
-                            {
-                                value: "./Sounds/YEET Sound.mp3",
-                                name: "YEET"
-                            },
-                            {
-                                value: "./Sounds/stop it_get some help.mp3",
-                                name: "Stop it. Get some help."
-                            },
-                            {
-                                value: "./Sounds/Now thats a lot of damage meme.mp3",
-                                name: "Now that's a lot of damage"
-                            },
-                        ]
-                    },
-                    {
-                        name: "anzeigen",
-                        description: "Zeigt an, dass du diesen Command verwendet hast",
-                        type: 5,
-                        required: false,
-                        default: false
-                    }
-                ]
-            },
-            {
-                name: "panel",
-                description: "Knöpfe für alle Sounds",
-                type: 1,
-            }
-        ]
-    }
+    name: "soundboard",
+    description: "Play a sound from a collection of sounds",
+    options: [
+        {
+            name: "schaller",
+            description: "O-Töne von Herr Schaller? Waaaaaaaas? Abgefaaaaaah'n",
+            type: "SUB_COMMAND" as Discord.ApplicationCommandOptionType,
+            options: [
+                {
+                    name: "sound",
+                    description: "The sound played",
+                    type: "STRING" as Discord.ApplicationCommandOptionType,
+                    required: true,
+                    choices: [
+                        {
+                            value: "./Sounds/feierabend_leck_moodle.mp3",
+                            name: "Moodle, BBB, Boah leck, endlich Feierabend"
+                        },
+                        {
+                            value: "./Sounds/waermi_auf_de_ranze.mp3",
+                            name: "Wärmi auf de Ranze! Ah herrlich!"
+                        },
+                        {
+                            value: "./Sounds/mach_ich_mit_bin_dabei.mp3",
+                            name: "Da mach ich mit! Da bin ich dabei!"
+                        },
+                        {
+                            value: "./Sounds/waas_abgefahren.mp3",
+                            name: "Waaaaaaas?! Abgefaaaaah'n!"
+                        },
+                    ]
+                },
+                {
+                    name: "anzeigen",
+                    description: "Zeigt an, dass du diesen Command verwendet hast",
+                    type: "BOOLEAN" as Discord.ApplicationCommandOptionType,
+                    required: false,
+                    default: false
+                }
+            ]
+        },
+        {
+            name: "verschiedenes",
+            description: "Verschiedene Sounds",
+            type: "SUB_COMMAND" as Discord.ApplicationCommandOptionType,
+            options: [
+                {
+                    name: "sound",
+                    description: "The sound played",
+                    type: "STRING" as Discord.ApplicationCommandOptionType,
+                    required: true,
+                    choices: [
+                        {
+                            value: "./Sounds/hello_how_are_you_im_under_the_water.mp3",
+                            name: "Please help me, I'm under the water"
+                        },
+                        {
+                            value: "./Sounds/pro gamer move.mp3",
+                            name: "I'm gonna do what's called a pro gamer move"
+                        },
+                        {
+                            value: "./Sounds/Big Brain Time.mp3",
+                            name: "Yeah, this is big brain time"
+                        },
+                        {
+                            value: "./Sounds/YEET Sound.mp3",
+                            name: "YEET"
+                        },
+                        {
+                            value: "./Sounds/stop it_get some help.mp3",
+                            name: "Stop it. Get some help."
+                        },
+                        {
+                            value: "./Sounds/Now thats a lot of damage meme.mp3",
+                            name: "Now that's a lot of damage"
+                        },
+                    ]
+                },
+                {
+                    name: "anzeigen",
+                    description: "Zeigt an, dass du diesen Command verwendet hast",
+                    type: "BOOLEAN" as Discord.ApplicationCommandOptionType,
+                    required: false,
+                    default: false
+                }
+            ]
+        },
+        {
+            name: "panel",
+            description: "Knöpfe für alle Sounds",
+            type: "SUB_COMMAND" as Discord.ApplicationCommandOptionType,
+        }
+    ]
 }
 
-export async function execute(interaction: any, client: Discord.Client, args: { name: string, value: any }[]) {
-    if (args[0].name == "panel") {
+export async function execute(interaction: Discord.CommandInteraction, client: Discord.Client) {
+    if (interaction.options.getSubcommand() == "panel") {
         await showPanel(client, interaction);
         return;
     }
-    const soundSource = args.find(arg => arg.name.toLowerCase() == "sound")?.value
-    let showSourceArg = args.find(arg => arg.name.toLowerCase() == "anzeigen")
-    let showSource = showSourceArg ? showSourceArg.value as boolean : false
+    const soundSource = interaction.options.getString("sound", true)
+    const showSource = interaction.options.getBoolean("anzeigen") || false
 
     playSound(interaction, client, soundSource, showSource);
 }
@@ -116,15 +113,15 @@ export async function handleButtons(interaction: any, client: Discord.Client, cu
     playSound(interaction, client, customID, false)
 }
 
-async function playSound(interaction: any, client: Discord.Client, soundSource: string, show_source: boolean) {
-    let voice = await getVoice(interaction, client, interaction.member.user.id)
+async function playSound(interaction: Discord.Interaction, client: Discord.Client, soundSource: string, show_source: boolean) {
+    let voice = await getVoice(interaction, client, interaction.user.id)
     if (voice) {
         try {
             const voiceChannel = voice.channel as Discord.VoiceChannel
             let connection = Voice.joinVoiceChannel({
                 channelId: voiceChannel.id,
-                guildId: interaction.guild_id,
-                adapterCreator: await (await client.guilds.fetch(interaction.guild_id)).voiceAdapterCreator
+                guildId: interaction.guildId as string,
+                adapterCreator: await (interaction.guild as Discord.Guild).voiceAdapterCreator
             })
             let player = Voice.createAudioPlayer();
             connection.subscribe(player)
@@ -144,20 +141,19 @@ async function playSound(interaction: any, client: Discord.Client, soundSource: 
         data: {
             type: 4,
             data: {
-                content: `<@${interaction.member.user.id}> hast einen Sound abgespielt!`,
+                content: `<@${interaction.user.id}> hast einen Sound abgespielt!`,
                 flags: show_source ? 0 : (1 << 6)
             },
         }
     });
 }
 
-async function getVoice(interaction: any, client: Discord.Client, member: string) {
-    const guild = await client.guilds.fetch(interaction.guild_id)
-    const voice = await guild.voiceStates.cache.get(member)
+async function getVoice(interaction: Discord.Interaction, client: Discord.Client, member: string) {
+    const voice = await (interaction.guild as Discord.Guild).voiceStates.cache.get(member)
     return voice
 }
 
-async function showPanel(client: Discord.Client, interaction: any) {
+async function showPanel(client: Discord.Client, interaction: Discord.CommandInteraction) {
 
     let panelComponents = [{
         type: 1,
@@ -240,7 +236,7 @@ async function showPanel(client: Discord.Client, interaction: any) {
     (client as any).api.interactions(interaction.id, interaction.token).callback.post({
         data: {
             type: 4,
-            data: await createAPIMessage(interaction, "Soundboard by BaumBot", client, undefined, panelComponents),
+            data: await createAPIMessage(interaction, "Soundboard by BaumBot", client, panelComponents),
         }
     });
 }

@@ -4,45 +4,39 @@ import { Launch } from "./rocketlaunch";
 import { getAPIData, getUpcomingEmbed, getExtended, endpoints } from "./rocketindex"
 
 export const command = {
-    data: {
         name: "rockets",
         description: "Get Launches, Rockets, etc",
         options: [
             {
                 name: "launches",
                 description: "Get Rocket launches, all or a specific",
-                type: 1,
+                type: "SUB_COMMAND" as Discord.ApplicationCommandOptionType,
                 options: [
                     {
                         name: "id",
                         description: "ID of a specific Launch",
-                        type: 3,
+                        type: "STRING" as Discord.ApplicationCommandOptionType,
                         required: false
                     },
                     {
                         name: "force",
                         description: "Force an update of the data",
-                        type: 5,
+                        type: "BOOLEAN" as Discord.ApplicationCommandOptionType,
                         required: false
                     }
                 ]
             }
         ]
-    }
 }
 
 export let allLaunches: { upcoming: string[], launches: { [id: string]: Launch } } = { upcoming: [], launches: {} };
 
-export async function execute(interaction: any, client: Discord.Client, topArgs: { options: { name: string, value: any }[], name: string }[]) {
-    const subCommand = topArgs[0].name
-    const args = topArgs[0].options
-
-    switch (subCommand) {
+export async function execute(interaction: Discord.CommandInteraction, client: Discord.Client) {
+    switch (interaction.options.getSubcommand()) {
         case "launches":
 
-            let idArg = args ? args.find(arg => arg.name == `id`) : undefined
-            let forceArg = args ? args.find(arg => arg.name == `force`) : undefined
-            let force = typeof forceArg == "undefined" ? false : forceArg.value;
+            let idArg = interaction.options.getString("id") || undefined
+            let force = interaction.options.getBoolean("force") || false
 
             if (typeof idArg === "undefined") {
 
@@ -88,7 +82,7 @@ export async function execute(interaction: any, client: Discord.Client, topArgs:
                     data: await createAPIMessage(interaction, await getUpcomingEmbed(Object.values(allLaunches.launches).filter(launch => allLaunches.upcoming.includes(launch.id))), client),
                 });
             } else {
-                const id: string = idArg.value;
+                const id: string = idArg;
 
                 let launch = Object.keys(allLaunches.launches).includes(id) ? await getExtended(allLaunches.launches[id]) : await getExtended(id);
                 await launch.update(force, undefined)

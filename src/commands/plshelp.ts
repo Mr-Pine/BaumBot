@@ -2,25 +2,23 @@ import * as Discord from "discord.js";
 import * as Voice from "@discordjs/voice"
 
 export const command = {
-    data: {
-        name: "plshelp",
-        description: "Helfe deinem Freund mit etwas Inspiration",
-        options: [
-            {
-                name: "hilfsbedürftiger",
-                description: "Wem muss geholfen werden?",
-                required: true,
-                type: 6
-            }
-        ]
-    }
+    name: "plshelp",
+    description: "Helfe deinem Freund mit etwas Inspiration",
+    options: [
+        {
+            name: "hilfsbedürftiger",
+            description: "Wem muss geholfen werden?",
+            required: true,
+            type: 'USER' as Discord.ApplicationCommandOptionType
+        }
+    ]
 }
 
-export async function execute(interaction: any, client: Discord.Client, args: { name: string, value: any }[]) {
-    const member = args.find(arg => arg.name == "hilfsbedürftiger")?.value
+export async function execute(interaction: Discord.CommandInteraction, client: Discord.Client) {
+    const member = interaction.options.getMember("hilfsbedürftiger", true) as Discord.GuildMember
 
     client.channels.fetch("704662634246701166").then(helpChannel => {
-        getVoice(interaction, client, member).then(async voice => {
+        getVoice(interaction, client, member.id).then(async voice => {
             if (voice) {
                 if (voice.channelId != null) {
                     voice.setChannel(helpChannel as Discord.VoiceChannelResolvable, "War mal nötig")
@@ -29,7 +27,7 @@ export async function execute(interaction: any, client: Discord.Client, args: { 
                         data: {
                             type: 4,
                             data: {
-                                content: `Bin <@${member.value}> zur Hilfe!`
+                                content: `Bin <@${member.id}> zur Hilfe!`
                             }
                         }
                     });
@@ -37,8 +35,8 @@ export async function execute(interaction: any, client: Discord.Client, args: { 
                     try {
                         let connection = Voice.joinVoiceChannel({
                             channelId: (helpChannel as Discord.VoiceChannel).id,
-                            guildId: interaction.guild_id,
-                            adapterCreator: await (await client.guilds.fetch(interaction.guild_id)).voiceAdapterCreator
+                            guildId: interaction.guildId as string,
+                            adapterCreator: await (await client.guilds.fetch(interaction.guildId as string)).voiceAdapterCreator
                         })
                         connection.on(Voice.VoiceConnectionStatus.Ready, () => {
                             let player = Voice.createAudioPlayer();
