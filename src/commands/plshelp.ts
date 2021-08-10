@@ -1,66 +1,55 @@
 import * as Discord from "discord.js";
+import * as Voice from "@discordjs/voice"
+import { getVoice } from "..";
 
 export const command = {
-    data: {
-        name: "plshelp",
-        description: "Helfe deinem Freund mit etwas Inspiration",
-        options: [
-            {
-                name: "hilfsbedürftiger",
-                description: "Wem muss geholfen werden?",
-                required: true,
-                type: 6
-            }
-        ]
-    }
+    name: "plshelp",
+    description: "Helfe deinem Freund mit etwas Inspiration",
+    options: [
+        {
+            name: "hilfsbedürftiger",
+            description: "Wem muss geholfen werden?",
+            required: true,
+            type: 'USER' as Discord.ApplicationCommandOptionType
+        }
+    ]
 }
 
-export function execute(interaction: any, client: Discord.Client, args: { name: string, value: any }[]) {
-    const member = args.find(arg => arg.name == "hilfsbedürftiger")?.value
+export async function execute(interaction: Discord.CommandInteraction, client: Discord.Client) {
+    const member = interaction.options.getMember("hilfsbedürftiger", true) as Discord.GuildMember
 
     client.channels.fetch("704662634246701166").then(helpChannel => {
-        getVoice(interaction, client, member).then(voice => {
-            if (voice.channelID != null) {
-                voice.setChannel(helpChannel, "War mal nötig")
-                const anyClient = client as any
-                anyClient.api.interactions(interaction.id, interaction.token).callback.post({
-                    data: {
-                        type: 4,
-                        data: {
-                            content: `Bin <@${member.value}> zur Hilfe!`
-                        }
-                    }
-                });
+        getVoice(interaction, client, member.id).then(async voice => {
+            if (voice) {
+                if (voice.channelId != null) {
+                    voice.setChannel(helpChannel as Discord.VoiceChannelResolvable, "War mal nötig")
+                    const anyClient = client as any
+                    interaction.reply(`Bin <@${member.id}> zur Hilfe!`)
 
-                try {
-                    (helpChannel as Discord.VoiceChannel).join().then(connection => {
-                        const dispatcher = connection.play("./Sounds/plshelp/plshelp.mp3")
-                        let started = false
-                        let counter = 0
-                        dispatcher.on("finish", () => {
-                            (helpChannel as Discord.VoiceChannel).leave()
+                    try {
+                        let connection = Voice.joinVoiceChannel({
+                            channelId: (helpChannel as Discord.VoiceChannel).id,
+                            guildId: interaction.guildId as string,
+                            adapterCreator: await (interaction.guild as Discord.Guild).voiceAdapterCreator
                         })
-                    }).catch(err => console.log(err))
-                } catch (err) {
-                    console.log(err)
-                    console.log(interaction.member)
-                }
-            } else {
-                (client as any).api.interactions(interaction.id, interaction.token).callback.post({
-                    data: {
-                        type: 4,
-                        data: {
-                            content: `Ich kann nur Leuten im Sprachchat helfen :confused:`
-                        }
+                        connection.on(Voice.VoiceConnectionStatus.Ready, () => {
+                            let player = Voice.createAudioPlayer();
+                            player.play(Voice.createAudioResource("./Sounds/plshelp/plshelp.mp3"))
+                            connection.subscribe(player)
+                            player.on(Voice.AudioPlayerStatus.Idle, () => {
+                                player.stop()
+                                connection.destroy()
+                            })
+                        })
+                    } catch (err) {
+                        console.log(err)
+                        console.log(interaction.member)
                     }
-                });
+                } else {
+                    interaction.reply(`Ich kann nur Leuten im Sprachchat helfen :confused:`);
+                }
             }
         })
     })
 }
 
-async function getVoice(interaction: any, client: Discord.Client, member: string) {
-    const guild = await client.guilds.fetch(interaction.guild_id)
-    const voice = await guild.voiceStates.cache.get(member) || new Discord.VoiceState(guild, { user_id: member });
-    return voice
-}
