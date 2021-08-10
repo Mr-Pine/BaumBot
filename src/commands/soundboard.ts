@@ -1,6 +1,6 @@
 import * as Discord from "discord.js";
 import * as Voice from "@discordjs/voice"
-import { createAPIMessage } from "..";
+import { getVoice } from "..";
 
 export const command = {
     name: "soundboard",
@@ -113,7 +113,7 @@ export async function handleButtons(interaction: any, client: Discord.Client, cu
     playSound(interaction, client, customID, false)
 }
 
-async function playSound(interaction: Discord.Interaction, client: Discord.Client, soundSource: string, show_source: boolean) {
+async function playSound(interaction: Discord.CommandInteraction | Discord.MessageComponentInteraction, client: Discord.Client, soundSource: string, show_source: boolean) {
     let voice = await getVoice(interaction, client, interaction.user.id)
     if (voice) {
         try {
@@ -137,21 +137,10 @@ async function playSound(interaction: Discord.Interaction, client: Discord.Clien
             console.log(interaction.member)
         }
     }
-    (client as any).api.interactions(interaction.id, interaction.token).callback.post({
-        data: {
-            type: 4,
-            data: {
-                content: `<@${interaction.user.id}> hast einen Sound abgespielt!`,
-                flags: show_source ? 0 : (1 << 6)
-            },
-        }
-    });
+    interaction.reply({content: `<@${interaction.user.id}> hast einen Sound abgespielt!`, ephemeral: !show_source})
 }
 
-async function getVoice(interaction: Discord.Interaction, client: Discord.Client, member: string) {
-    const voice = await (interaction.guild as Discord.Guild).voiceStates.cache.get(member)
-    return voice
-}
+
 
 async function showPanel(client: Discord.Client, interaction: Discord.CommandInteraction) {
 
@@ -231,12 +220,6 @@ async function showPanel(client: Discord.Client, interaction: Discord.CommandInt
         ]
     }
     ];
-
-
-    (client as any).api.interactions(interaction.id, interaction.token).callback.post({
-        data: {
-            type: 4,
-            data: await createAPIMessage(interaction, "Soundboard by BaumBot", client, panelComponents),
-        }
-    });
+    
+    interaction.reply({content: "Soundboard by BaumBot", components: panelComponents})
 }

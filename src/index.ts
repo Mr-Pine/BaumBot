@@ -22,7 +22,7 @@ client.on('ready', () => {
 
     if (resendCommands) sendCommands(client);
 
-    let laal = rocketTest(client)
+    //let laal = rocketTest(client)
 
 })
 
@@ -112,6 +112,11 @@ export async function createAPIMessage(interaction: Discord.CommandInteraction, 
     (apiMessage.data as any).flags = ephemeral ? 64 : 0;
 
     return apiMessage;
+}
+
+export async function getVoice(interaction: Discord.Interaction, client: Discord.Client, member: string) {
+    const voice = await (interaction.guild as Discord.Guild).voiceStates.cache.get(member)
+    return voice
 }
 
 process.on("SIGINT", _ => {
