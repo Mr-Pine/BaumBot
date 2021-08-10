@@ -1,4 +1,4 @@
-import { Client, MessageEmbed, TextChannel } from "discord.js"
+import { Client, MessageEmbed } from "discord.js"
 import fetch, { Headers } from "node-fetch"
 import { LaunchExtended } from "./launchExtended"
 import { LaunchSpaceX } from "./launchSpaceX"
@@ -65,7 +65,7 @@ export async function getExtended(launchOrID: Launch | LaunchExtended | string) 
     return extendedLaunch;
 }
 
-export async function getUpcomingEmbed(launches: Launch[]) {
+export async function getUpcomingData(launches: Launch[]) {
     let embeds: MessageEmbed[] = [];
     let startEmbed = new MessageEmbed()
         .setTitle("Upcoming Rocketlaunches")
@@ -76,9 +76,16 @@ export async function getUpcomingEmbed(launches: Launch[]) {
 
     embeds.push(startEmbed)
 
+    let selectOptions: {label: string, description: string, value: string}[] = []
+
     launches.forEach(async launch => {
         embeds.push(launch.embedShort)
+        selectOptions.push({
+            label: launch.missionName,
+            description: launch.rocket.name,
+            value: `${launch.id}`
+        })
     })
 
-    return embeds
+    return {embeds: embeds, infoSelect: selectOptions}
 }

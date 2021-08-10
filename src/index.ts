@@ -64,7 +64,6 @@ async function sendCommands(client: Discord.Client) {
 }
 
 client.on("interactionCreate", async interaction => {
-    console.log(interaction);
 
     if (interaction.isCommand()) {
 
@@ -97,6 +96,9 @@ client.on("interactionCreate", async interaction => {
         if (customID.startsWith("soundboard\\")) {
             soundboard.handleButtons(interaction, client, croppedID)
         }
+    } else if (interaction.isSelectMenu()) {
+        console.log(interaction)
+        rocketManager.rocketInfo(interaction.values[0], interaction)
     }
 })
 

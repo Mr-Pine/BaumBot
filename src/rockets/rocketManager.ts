@@ -1,7 +1,7 @@
 import * as Discord from "discord.js"
 import { createAPIMessage } from "..";
 import { Launch } from "./rocketlaunch";
-import { getAPIData, getUpcomingEmbed, getExtended, endpoints } from "./rocketindex"
+import { getAPIData, getUpcomingData, getExtended, endpoints } from "./rocketindex"
 
 export const command = {
     name: "rockets",
@@ -71,18 +71,43 @@ export async function execute(interaction: Discord.CommandInteraction, client: D
 
                 let upcomingIds = Object.values(allLaunches.launches).filter(launch => allLaunches.upcoming.includes(launch.id))
 
-                await interaction.editReply({ embeds: await getUpcomingEmbed(upcomingIds) })
+                let upcomingData = await getUpcomingData(upcomingIds)
+
+                await interaction.editReply({ embeds: upcomingData.embeds })
+                interaction.followUp({
+                    content: "Select a launch to get more info",
+                    components: [
+                        new Discord.MessageActionRow().addComponents(
+                            new Discord.MessageSelectMenu()
+                                .setCustomId("launchInfo")
+                                .setPlaceholder("Select a launch")
+                                .addOptions(upcomingData.infoSelect)
+                        )
+                    ]
+                })
 
             } else {
                 const id: string = idArg;
 
-                let launch = Object.keys(allLaunches.launches).includes(id) ? await getExtended(allLaunches.launches[id]) : await getExtended(id);
+                /*let launch = Object.keys(allLaunches.launches).includes(id) ? await getExtended(allLaunches.launches[id]) : await getExtended(id);
                 await launch.update(force, undefined)
                 allLaunches.launches[id] = launch;
 
                 interaction.reply({ embeds: [launch.getEmbed()] })
 
-                console.log("hi")
+                console.log("hi")*/
+                rocketInfo(id, interaction, force)
             }
+            break;
     }
+}
+
+export async function rocketInfo(id: string, interaction: Discord.CommandInteraction | Discord.MessageComponentInteraction, force = false) {
+    let launch = Object.keys(allLaunches.launches).includes(id) ? await getExtended(allLaunches.launches[id]) : await getExtended(id);
+    await launch.update(force, undefined)
+    allLaunches.launches[id] = launch;
+
+    interaction.reply({ embeds: [launch.getEmbed()] })
+
+    console.log("hi")
 }
