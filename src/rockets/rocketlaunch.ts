@@ -1,3 +1,4 @@
+import { MessageEmbed } from "discord.js"
 import fetch, { Headers } from "node-fetch"
 import { LaunchExtended } from "./launchExtended"
 import { getAPIData } from "./rocketindex"
@@ -44,18 +45,34 @@ export class Launch {
         this.lastUpdatedT = 0;
     }
 
+    get missionName() { return this.mission ? this.mission.name : this.name.substr(this.name.indexOf("|") + 1).trim() }
+
     get embedField() {
-        let missionName = this.mission ? this.mission.name : this.name.substr(this.name.indexOf("|") + 1).trim()
         return {
             name: `${this.tMinus()} | ${this.name}`,
             value: `${this.mission ? this.mission.description : "no description available"}\n\n` +
                 `**Quick Stats**:\n` +
-                `Mission Name: ${missionName}\n` +
+                `Mission Name: ${this.missionName}\n` +
                 `Launch Time: ${this.net.toLocaleString('de-DE')}\n` +
                 `Launch at: ${this.launchpad.nameLocation}\n` +
                 `Launch Status: ${this.status.name}\n\n` +
                 `more info: \`/rockets launches id:${this.id}\`\n`
         }
+    }
+
+    get embedShort() {
+        let embed = new MessageEmbed()
+            .setTitle(`${this.tMinus()} | ${this.name}`)
+            .setThumbnail(this.symbolImageUrl)
+            .setTimestamp(this.net)
+            .setDescription(`${this.mission ? this.mission.description : "no description available"}`)
+            .addField("Quick Stats:", `Mission Name: ${this.missionName}\n` +
+                `Launch Time: ${this.net.toLocaleString('de-DE')}\n` +
+                `Launch at: ${this.launchpad.nameLocation}\n` +
+                `Launch Status: ${this.status.name}`)
+                .setColor(0xfca103)
+
+        return embed
     }
 
     tMinus() {
@@ -125,7 +142,7 @@ export class Launch {
 
         let json = (typeof launchJSON == "undefined") ? await this.getOwnAPIData() : launchJSON
 
-        if((json.detail as string)?.startsWith("Request was throttled")) {
+        if ((json.detail as string)?.startsWith("Request was throttled")) {
             return false
         }
 

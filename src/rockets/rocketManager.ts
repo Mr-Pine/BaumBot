@@ -69,7 +69,9 @@ export async function execute(interaction: Discord.CommandInteraction, client: D
                     console.log(`upcoming Launches: ${allLaunches.upcoming}`)
                 };
 
-                await interaction.editReply({ embeds: [await getUpcomingEmbed(Object.values(allLaunches.launches).filter(launch => allLaunches.upcoming.includes(launch.id)))] })
+                let upcomingIds = Object.values(allLaunches.launches).filter(launch => allLaunches.upcoming.includes(launch.id))
+
+                await interaction.editReply({ embeds: await getUpcomingEmbed(upcomingIds) })
 
             } else {
                 const id: string = idArg;

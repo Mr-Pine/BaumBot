@@ -66,17 +66,19 @@ export async function getExtended(launchOrID: Launch | LaunchExtended | string) 
 }
 
 export async function getUpcomingEmbed(launches: Launch[]) {
-    let embed = new MessageEmbed()
+    let embeds: MessageEmbed[] = [];
+    let startEmbed = new MessageEmbed()
         .setTitle("Upcoming Rocketlaunches")
         .setDescription("the 6 next rocket lauches")
         .setURL("https://everydayastronaut.com/prelaunch-previews/")
         .setColor(0xfca103)
         .setTimestamp(new Date());
 
+    embeds.push(startEmbed)
+
     launches.forEach(async launch => {
-        let fieldData = launch.embedField
-        embed.addField(fieldData.name, fieldData.value, false)
+        embeds.push(launch.embedShort)
     })
 
-    return embed
+    return embeds
 }
